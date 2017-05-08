@@ -57,13 +57,21 @@ public class HelloController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public ModelAndView connect(ModelMap model) {
 
-		ModelAndView model1 = new ModelAndView();
-		model1.setViewName("model1");
-		TokenAndPath tokenAndPath = new TokenAndPath();
-		tokenAndPath.setPath("/sai/path");
-		tokenAndPath.setToken("12345token");
-		model1.addObject("token", tokenAndPath);
 		
+		
+		
+		ModelAndView model1 = new ModelAndView();
+		model1.setViewName("hello");
+		TokenAndPath tokenAndPath = new TokenAndPath();
+	
+	
+		
+		
+		 String home = System.getProperty("user.home");
+
+			tokenAndPath.setPath(home);
+			
+			model1.addObject("token", tokenAndPath);
 		return model1;
 		//return "hello";
 
