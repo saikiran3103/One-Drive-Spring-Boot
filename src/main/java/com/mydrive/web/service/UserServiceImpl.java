@@ -1,4 +1,4 @@
-package com.mkyong.web.service;
+package com.mydrive.web.service;
 
 import java.awt.Desktop;
 import java.io.BufferedWriter;
@@ -49,7 +49,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
-import com.mkyong.web.controller.TokenAndPath;
+import com.mydrive.TokenAndPath;
 @Service
 public class UserServiceImpl implements UserService {
 

@@ -1,4 +1,4 @@
-package com.mkyong.web.controller;
+package com.mydrive;
 
 public class TokenAndPath {
 

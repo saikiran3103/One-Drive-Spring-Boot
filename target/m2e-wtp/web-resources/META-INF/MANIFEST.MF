@@ -1,5 +1,10 @@
 Manifest-Version: 1.0
+Implementation-Title: ONE DRIVE BOOT
+Implementation-Version: 1.0
 Built-By: sai.kiran.akkireddy
+Implementation-Vendor-Id: org.springframework.boot
 Build-Jdk: 1.8.0_121
+Implementation-URL: https://www.mkyong.com
 Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
 
