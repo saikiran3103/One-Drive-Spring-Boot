@@ -62,6 +62,7 @@ public static void processAndDownloadSubFolders(String tokenheader, String commo
 			downloadUrls1.add(Url1);
 	}
 	}
+	if(!downloadUrls1.isEmpty()){
 	ExecutorService executor1 = Executors.newFixedThreadPool(downloadUrls1.size());
 	for (String downloadUrl1:downloadUrls1){
 
@@ -72,5 +73,6 @@ public static void processAndDownloadSubFolders(String tokenheader, String commo
 	}
 	executor1.shutdown();
 
+}
 }
 }
