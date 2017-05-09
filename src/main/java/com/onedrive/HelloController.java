@@ -93,7 +93,7 @@ public class HelloController {
 //			System.out.println("saiiiiii"+"   "+path);
 			
 //			request.getParameterMap();
-			logger.info("sai is testing logs"+request.getParameter("param1"));
+			logger.info("Request"+request.toString());
 			
 			return "welcome";
 		}
@@ -108,6 +108,7 @@ public class HelloController {
 //			System.out.println(request.getParameter("param1"));
 			System.out.println(request.getParameter("param2"));
 			HttpSession session = request.getSession();
+			logger.info("Request"+request.toString());
 			System.out.println(session.getAttribute("token"));
 			TokenAndPath tokenAndPath=new TokenAndPath();
 			tokenAndPath.setToken((String)session.getAttribute("token"));

@@ -2,7 +2,7 @@
 <HEAD>
 <TITLE>Your Title Here</TITLE>
 </HEAD>
-<BODY  BGCOLOR="violet">
+<BODY  BGCOLOR="white">
 
 <article>
   <header>
@@ -20,13 +20,15 @@
 <div style="text-align:center"> 
 <form name="myForm" action="path1" method="POST">
 <p style="
+ 
+ 
     font-size: 22pt;
-    font-family: monospace;
-    font-style: inherit;
+    font-style: italic;
     font-feature-settings: initial;
-    color: #0b83e9;
+    color: #f3185d;
     width: 1545px;
-    margin-top: 85px;">Enter the shared  One drive URL :</p> <input id="text1" type="text" >
+    margin-top: 85px;
+    ">Enter the shared  One drive URL :</p> <input id="text1" type="text" >
 <!-- <input id="param1" type="hidden" name="param1" value="Test"> -->
 <input id="param2" type="hidden" name="param2" value="Test2">
 <input type="button" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" Value="Download And Convert" onclick="submitform();">

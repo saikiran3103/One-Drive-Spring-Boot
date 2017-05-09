@@ -1,6 +1,5 @@
 package com.onedrive;
 
-import java.awt.Desktop;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +9,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -24,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -151,6 +150,10 @@ public class UserServiceImpl implements UserService {
 
 
 		String responseFromAdaptor= UserServiceImpl.doGet(completeurl, tokenheader);
+		
+		if(responseFromAdaptor.equals("error")){
+			return "error";
+		}
 
 		final Gson gson = new Gson();
 
@@ -186,6 +189,7 @@ public class UserServiceImpl implements UserService {
 
 
 		// create the size of the thread pool dynamically
+		if(!downloadUrls.isEmpty()){
 		ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
 		final long startTime = System.currentTimeMillis();
 		for (String downloadUrl:downloadUrls){
@@ -196,29 +200,41 @@ public class UserServiceImpl implements UserService {
 			executor.execute(download);
 		}
 		executor.shutdown();
-
+		
 		final long endTime = System.currentTimeMillis();
 		System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
 
-		if(  (executor.awaitTermination(20, TimeUnit.SECONDS) )){
-			List<File> filesInFolder = Files.walk(Paths.get(dir.getPath()))
-					.filter(Files::isRegularFile)
-					.map(Path::toFile)
-					.collect(Collectors.toList());
-			ExecutorService converterExecutor = Executors.newFixedThreadPool(filesInFolder.size());
-			for(File officefile:filesInFolder){
-
-				//parallel conversion of all files 
-				Runnable converter= new ParallelConverter(officefile, file);
-				converterExecutor.execute(converter);
-
-			}
-			converterExecutor.shutdown();
+		concurrentConverter(file, dir, executor);
 		}
-
+		else{
+			fileReaderAndConverter(file, dir);
+		}
 		return "display";
 
 
+	}
+
+	private void concurrentConverter(String file, File dir, ExecutorService executor)
+			throws InterruptedException, IOException {
+		if(  (executor.awaitTermination(60, TimeUnit.SECONDS) )){
+			fileReaderAndConverter(file, dir);
+		}
+	}
+
+	private void fileReaderAndConverter(String file, File dir) throws IOException {
+		List<File> filesInFolder = Files.walk(Paths.get(dir.getPath()))
+				.filter(Files::isRegularFile)
+				.map(Path::toFile)
+				.collect(Collectors.toList());
+		ExecutorService converterExecutor = Executors.newFixedThreadPool(filesInFolder.size());
+		for(File officefile:filesInFolder){
+
+			//parallel conversion of all files 
+			Runnable converter= new ParallelConverter(officefile, file);
+			converterExecutor.execute(converter);
+
+		}
+		converterExecutor.shutdown();
 	}
 
 	private void readingInnerFolders(String tokenheader, String commonUrl, String base_path,String child, String file, File dir,
@@ -269,6 +285,7 @@ public class UserServiceImpl implements UserService {
 				downloadUrls1.add(Url1);
 			}
 		}
+		if (!downloadUrls1.isEmpty()){
 		ExecutorService executor1 = Executors.newFixedThreadPool(downloadUrls1.size());
 		for (String downloadUrl1:downloadUrls1){
 
@@ -293,6 +310,7 @@ public class UserServiceImpl implements UserService {
 		//			}
 		//			converterExecutor.shutdown();
 		//		}
+	}
 	}
 
 	public static void downloadFile(String fileURL, String saveDir)
@@ -357,13 +375,22 @@ public class UserServiceImpl implements UserService {
 		httpRequest.addHeader("Authorization", tokenheader);
 
 		HttpResponse response = httpClient.execute(httpRequest);
+		
+		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
+		if(httpStatusCode.equals((HttpStatus.SC_OK))){
 		final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) response.getEntity();
 		final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
 		EntityUtils.consume( entity );
 		System.out.println(responseString);
 		httpClient.getConnectionManager().shutdown();
 		return responseString;
-
+		}
+		
+		else{
+			
+			return "error";
+		}
+		
 	}
 
 
