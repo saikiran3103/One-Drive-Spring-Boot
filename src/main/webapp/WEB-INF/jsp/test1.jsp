@@ -41,7 +41,7 @@
 function submitform(){
 	
 	document.getElementById("param2").value = document.getElementById("text1").value;
-	<!--get the token value from headerx-->
+	/*get the token value from header*/
 	window.location.parseHash = function(){
 		   var hash = (this.hash ||'').replace(/^#/,'').split('&'),
 		       parsed = {};

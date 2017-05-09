@@ -4,19 +4,19 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Your files are downloaded in to your default directory</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<title>downloaded </title>
 </head>
 <body>
 
-        
+     
    <div style="text-align:center">  <h1 style="
-    font-size: 34pt;
+    font-size: 26pt;
     font-family: serif;
     font-style: italic;
     font-feature-settings: initial;
-    color: rgba(169, 66, 66, 0.98);">Your files are downloaded in to your default download directory</h1>
-    
-    </div>
+    color: rgba(169, 66, 66, 0.98);">Your files are down-loaded in to ${message.message}</h1>
+     </div>
  
 </body>
 </html>

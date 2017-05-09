@@ -99,12 +99,18 @@ public class HelloController {
 		}
 
 		@RequestMapping(method = RequestMethod.POST, value="download")
-	    public String   finaldownload(TokenAndPath tokenAndPath ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+	    public ModelAndView   finaldownload(TokenAndPath tokenAndPath ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 			return service.finaldownload(tokenAndPath);
 		}
 		
+		
+		/* final Method to download the files
+		 * 
+		 * 
+		 * 
+		 */
 		@RequestMapping(method = RequestMethod.POST, value="onedrive/path1")
-	    public String getTokenAndPath(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+	    public ModelAndView getFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 //			System.out.println(request.getParameter("param1"));
 			System.out.println(request.getParameter("param2"));
 			HttpSession session = request.getSession();

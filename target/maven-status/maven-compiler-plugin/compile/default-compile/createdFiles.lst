@@ -1,11 +1,15 @@
 com\onedrive\MakeDirectoryUtility.class
 com\onedrive\OuterMetaData.class
 com\onedrive\HelloController.class
+com\onedrive\ErrorObject.class
 com\onedrive\UserService.class
 com\onedrive\HttpRestAdaptor.class
 com\onedrive\SpringBootWebApplication.class
 com\onedrive\ParentReference.class
+com\onedrive\SuccessMessageObject.class
+com\onedrive\ErrorMessage.class
 com\onedrive\User.class
+com\onedrive\InnerError.class
 com\onedrive\Folder.class
 com\onedrive\TokenAndPath.class
 com\onedrive\ParallelConverter.class

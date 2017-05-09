@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -40,6 +41,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -47,11 +49,15 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
 import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
 import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
+
+
 @Controller
 public class UserServiceImpl implements UserService {
 
 	private static final int BUFFER_SIZE = 4096;
 
+	
+	final static Logger logger = Logger.getLogger(UserServiceImpl.class);
 
 	private String home = System.getProperty("user.home");
 
@@ -102,9 +108,14 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public String finaldownload(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
+	public ModelAndView finaldownload(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
 
 
+		SuccessMessageObject messageObject= new SuccessMessageObject();
+		
+		ModelAndView enterLinkView = new ModelAndView();
+		
+		enterLinkView.setViewName("display");
 		String access_token= tokenAndPath.getToken();
 
 		String tokenheader = "Bearer"+" "+access_token;
@@ -150,12 +161,15 @@ public class UserServiceImpl implements UserService {
 
 
 		String responseFromAdaptor= UserServiceImpl.doGet(completeurl, tokenheader);
-		
+		final Gson gson = new Gson();
 		if(responseFromAdaptor.equals("error")){
-			return "error";
+			
+			ErrorMessage errorMessage=gson.fromJson(responseFromAdaptor, ErrorMessage.class);
+			enterLinkView.addObject(errorMessage);
+			return enterLinkView;
 		}
 
-		final Gson gson = new Gson();
+	
 
 		OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
 
@@ -176,16 +190,7 @@ public class UserServiceImpl implements UserService {
 
 		System.out.println(downloadUrls);
 
-		// single threaded application takes more response time		
-		//		final long startTime = System.currentTimeMillis();si
-		//		for (String downloadUrl:downloadUrls){
-		//		System.out.println("saveDir------>"+saveDir);
-		//		UserServiceImpl.downloadFile(downloadUrl, dir.getPath());
-		//		
-		//		}
-		//		
-		//		 final long endTime = System.currentTimeMillis();
-		//		System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
+	
 
 
 		// create the size of the thread pool dynamically
@@ -209,7 +214,11 @@ public class UserServiceImpl implements UserService {
 		else{
 			fileReaderAndConverter(file, dir);
 		}
-		return "display";
+		messageObject.setMessage(dir.getPath().toString());
+		enterLinkView.addObject("message",messageObject );
+		
+		logger.info(enterLinkView);
+		return enterLinkView;
 
 
 	}
@@ -377,13 +386,14 @@ public class UserServiceImpl implements UserService {
 		HttpResponse response = httpClient.execute(httpRequest);
 		
 		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
-		if(httpStatusCode.equals((HttpStatus.SC_OK))){
 		final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) response.getEntity();
 		final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
 		EntityUtils.consume( entity );
 		System.out.println(responseString);
 		httpClient.getConnectionManager().shutdown();
-		return responseString;
+
+		if(httpStatusCode.equals((HttpStatus.SC_OK))){
+				return responseString;
 		}
 		
 		else{
