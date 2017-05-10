@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css"
 	href="webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 
@@ -35,13 +36,21 @@ Enter the shared  One drive URL : <input id="text1" type="text" >
 <input type="button" Value="Download And Convert" onclick="submitform();">
 </form>
 </div>
-</BODY>
+
+ <div style="text-align:center">  <h1 style="
+    font-size: 26pt;
+    font-family: serif;
+    font-style: italic;
+    font-feature-settings: initial;
+    color: rgba(169, 66, 66, 0.98);">${message.message}</h1>
+     </div>
+     </BODY>
 
 <script type= text/javascript>
 function submitform(){
 	
 	document.getElementById("param2").value = document.getElementById("text1").value;
-	<!--get the token value from header-->
+	/*get the token value from header*/
 	window.location.parseHash = function(){
 		   var hash = (this.hash ||'').replace(/^#/,'').split('&'),
 		       parsed = {};

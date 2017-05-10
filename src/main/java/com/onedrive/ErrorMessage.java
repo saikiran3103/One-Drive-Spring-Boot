@@ -1,20 +1,26 @@
 package com.onedrive;
 
-public class ErrorMessage {
+import java.io.Serializable;
+
+public class ErrorMessage implements Serializable {
 	
-	private ErrorObject error;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7687509918835761850L;
+	private Error error;
 
 	/**
 	 * @return the error
 	 */
-	public ErrorObject getError() {
+	public Error getError() {
 		return error;
 	}
 
 	/**
 	 * @param error the error to set
 	 */
-	public void setError(ErrorObject error) {
+	public void setError(Error error) {
 		this.error = error;
 	}
 

@@ -1,7 +1,6 @@
 com\onedrive\MakeDirectoryUtility.class
 com\onedrive\OuterMetaData.class
 com\onedrive\HelloController.class
-com\onedrive\ErrorObject.class
 com\onedrive\UserService.class
 com\onedrive\HttpRestAdaptor.class
 com\onedrive\SpringBootWebApplication.class

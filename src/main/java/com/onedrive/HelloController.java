@@ -119,7 +119,7 @@ public class HelloController {
 			TokenAndPath tokenAndPath=new TokenAndPath();
 			tokenAndPath.setToken((String)session.getAttribute("token"));
 			tokenAndPath.setPath(request.getParameter("param2"));
-			logger.info("sai is testing logs");
+			logger.info("accesstoken: "+session.getAttribute("token"));
 			return service.finaldownload(tokenAndPath);
 			
 		}

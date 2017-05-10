@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.google.gson.Gson;
 
@@ -46,7 +47,17 @@ public static void processAndDownloadSubFolders(String tokenheader, String commo
 	innerdir1.mkdirs();
 
 	// make a call 
-	String responseFromAdaptor1= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
+	SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
+	
+	
+	String responseFromAdaptor1= responseAndMessage.getResponse();
+	
+	if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+		ErrorMessage errorMessage = gson.fromJson(responseFromAdaptor1, ErrorMessage.class);
+		ModelAndView errorView = new ModelAndView();
+		errorView.addObject("error", errorMessage);
+		
+	}
 
 	OuterMetaData outerMetaData1 =gson.fromJson(responseFromAdaptor1, OuterMetaData.class);
 

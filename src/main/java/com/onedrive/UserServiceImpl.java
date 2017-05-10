@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 				rt.exec(new String[] { "sh", "-c", cmd.toString() });
 			}
 		}catch(Exception ex){
-
+			logger.error(" error occured"  + ex.getMessage());
 			ex.printStackTrace();
 		}
 
@@ -110,10 +110,12 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public ModelAndView finaldownload(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
 
-
+		ModelAndView enterLinkView = new ModelAndView();
+	try{
+		
 		SuccessMessageObject messageObject= new SuccessMessageObject();
 		
-		ModelAndView enterLinkView = new ModelAndView();
+		
 		
 		enterLinkView.setViewName("display");
 		String access_token= tokenAndPath.getToken();
@@ -158,19 +160,26 @@ public class UserServiceImpl implements UserService {
 
 
 		//make a get call to one drive api
+		
+		
+		
 
 
-		String responseFromAdaptor= UserServiceImpl.doGet(completeurl, tokenheader);
+		SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(completeurl, tokenheader);
+		
+		
+		String responseFromAdaptor= responseAndMessage.getResponse();
+		
 		final Gson gson = new Gson();
-		if(responseFromAdaptor.equals("error")){
-			
-			ErrorMessage errorMessage=gson.fromJson(responseFromAdaptor, ErrorMessage.class);
-			enterLinkView.addObject(errorMessage);
-			return enterLinkView;
+		
+		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+			Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+			ModelAndView errorView = new ModelAndView();
+			errorView.addObject("error", errorMessage);
+			errorView.setViewName("display");
+			return errorView;
 		}
-
-	
-
+		
 		OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
 
 		System.out.println("json form ");
@@ -218,8 +227,15 @@ public class UserServiceImpl implements UserService {
 		enterLinkView.addObject("message",messageObject );
 		
 		logger.info(enterLinkView);
-		return enterLinkView;
+		
+	}
+	catch(Exception universalException){
+	
+logger.info("error occured" +universalException.getMessage());
 
+
+	}
+	return enterLinkView;	
 
 	}
 
@@ -278,8 +294,17 @@ public class UserServiceImpl implements UserService {
 		innerdir1.mkdirs();
 
 		// make a call 
-		String responseFromAdaptor1= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
+		SuccessMessageObject messageObject= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
 
+		String responseFromAdaptor1=messageObject.getResponse();
+		
+		if(messageObject.getMessage()!=null && messageObject.getMessage().equalsIgnoreCase("error")){
+			ErrorMessage errorMessage = gson.fromJson(responseFromAdaptor1, ErrorMessage.class);
+			ModelAndView errorView = new ModelAndView();
+			errorView.addObject("error", errorMessage);
+			
+		}
+		
 		OuterMetaData outerMetaData1 =gson.fromJson(responseFromAdaptor1, OuterMetaData.class);
 
 		List<String> downloadUrls1 = new ArrayList<String>();
@@ -376,30 +401,41 @@ public class UserServiceImpl implements UserService {
 		httpConn.disconnect();
 	}
 
-	public  static String doGet( final String url,String tokenheader ) throws ClientProtocolException, IOException{
+	public  static SuccessMessageObject doGet( final String url,String tokenheader ) throws ClientProtocolException, IOException{
+		
+		SuccessMessageObject messageObject = new SuccessMessageObject();
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		final HttpGet httpRequest = new HttpGet( url );
 
 		httpRequest.addHeader("Content-Type", "text/plain");
 		httpRequest.addHeader("Authorization", tokenheader);
 
+		logger.info(httpRequest.toString());
+		
 		HttpResponse response = httpClient.execute(httpRequest);
 		
 		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
+		
 		final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) response.getEntity();
 		final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
 		EntityUtils.consume( entity );
+		logger.info(httpRequest.toString());
 		System.out.println(responseString);
 		httpClient.getConnectionManager().shutdown();
-
-		if(httpStatusCode.equals((HttpStatus.SC_OK))){
-				return responseString;
+		
+		
+		messageObject.setResponse(responseString);
+		messageObject.setMessage("success");	
+		
+		if ( httpStatusCode != null && !httpStatusCode.equals( HttpStatus.SC_OK ) ){
+			messageObject.setMessage("error");	
 		}
 		
-		else{
-			
-			return "error";
-		}
+		
+	    return messageObject;
+		
+		
+		
 		
 	}
 

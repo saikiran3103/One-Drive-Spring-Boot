@@ -1,14 +1,24 @@
 package com.onedrive;
 
-public class ErrorObject {
+import java.io.Serializable;
+
+import com.google.gson.annotations.Expose;
+
+public class Error implements Serializable{
 	
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4133146300296311964L;
+
+	@Expose
 	private String code;
 	
-	
+	@Expose
 	private String message;
 	
-	
+	@Expose
 	private InnerError innerError;
 
 

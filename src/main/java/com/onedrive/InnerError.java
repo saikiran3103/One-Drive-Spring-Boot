@@ -1,10 +1,17 @@
 package com.onedrive;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
 
-public class InnerError {
+public class InnerError implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5485989958953816443L;
+
 
 	@SerializedName("request-id")
 	private String request_id;
