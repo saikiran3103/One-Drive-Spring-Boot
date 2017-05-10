@@ -1,9 +1,11 @@
 <HTML>
 <HEAD>
-<TITLE>Your Title Here</TITLE>
+<TITLE>Get Files</TITLE>
 </HEAD>
 <BODY onload="javascript:submitform();" BGCOLOR="FFFFFF">
 
+
+<p>test</p>
 <article>
   <header>
    <div style="text-align:center">  <h1>Get the files or folders from One Micorsoft One Drive Cloud from the shared link</h1>
@@ -44,4 +46,56 @@ function submitform(){
 </script>
 
 </BODY>
+<style>
+#loading {
+   width: 100%;
+   height: 100%;
+   top: 0;
+   left: 0;
+   position: fixed;
+   display: block;
+   opacity: 0.7;
+   background-color: #fff;
+   z-index: 99;
+   text-align: center;
+}
+
+#loading-image {
+  position: absolute;
+  top: 100px;
+  left: 240px;
+  z-index: 100;
+  
+  
+  
+  
+  .loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<div id="loader"></div>
+<div class="loader"></div>
+
+<script type="text/javascript">
+     $(window).load(function() {
+     $('#loader').hide();
+  });
+</script>
 </HTML>

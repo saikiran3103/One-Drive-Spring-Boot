@@ -27,6 +27,8 @@
     </div>
   </header>
   
+  Welcome
+  
 </article>
 <div style="text-align:center"> 
 <form name="myForm" action="path" method="POST">

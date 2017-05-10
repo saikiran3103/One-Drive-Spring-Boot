@@ -44,7 +44,7 @@
     ">Use the button below to connect to Office 365.</p>
     </div>
 				
-				<form action="token" method="GET">
+ <form action="token" method="GET">
 
 <div style="text-align:center" >
 <input type="submit" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Connect to Office 365"></div>
