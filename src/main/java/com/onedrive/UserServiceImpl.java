@@ -26,6 +26,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.poi.POIXMLProperties.CoreProperties;
@@ -405,6 +406,9 @@ public class UserServiceImpl implements UserService {
 
 	public  static SuccessMessageObject doGet( final String url,String tokenheader ) throws ClientProtocolException, IOException{
 		
+		
+		
+		try{
 		SuccessMessageObject messageObject = new SuccessMessageObject();
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 		final HttpGet httpRequest = new HttpGet( url );
@@ -412,9 +416,25 @@ public class UserServiceImpl implements UserService {
 		httpRequest.addHeader("Content-Type", "text/plain");
 		httpRequest.addHeader("Authorization", tokenheader);
 
-		logger.info(httpRequest.toString());
+		logger.info(httpRequest);
 		
 		HttpResponse response = httpClient.execute(httpRequest);
+		
+		logger.info(response);
+
+		if ( null == response )	{
+			logger.error( "Http Request failed, httpResponse is null." );
+			messageObject.setMessage("error");
+			releaseHttpConnection( httpRequest );
+			
+		}
+
+		if ( null == response.getStatusLine() )	{
+			logger.error( "Http Request failed, httpResponse is null." );
+			messageObject.setMessage("error");
+			releaseHttpConnection( httpRequest );
+			
+		}
 		
 		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
 		
@@ -434,11 +454,31 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		
-	    return messageObject;
+		return messageObject;
+		}
+		catch(Exception ex){
+			
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage("error");
+			
+	        logger.info("error occured" +ex.getMessage());
+	        return messageObject;
+		}
+	    
 		
 		
 		
 		
+	}
+	
+	
+	private static void releaseHttpConnection( final HttpRequestBase httpRequest ) {
+		if ( null != httpRequest ) {
+			httpRequest.abort();;
+			if ( !httpRequest.isAborted() ) {
+				httpRequest.abort();
+			}
+		}
 	}
 
 
