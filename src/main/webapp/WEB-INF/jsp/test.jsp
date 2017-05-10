@@ -26,7 +26,7 @@ Enter the shared  One drive URL : <input id="text1" type="text" >
 function submitform(){
 	
 	document.getElementById("param2").value = document.getElementById("text1").value;
-	<!--get the token value from header-->
+	/*get the token value from header*/
 	location.parseHash = function(){
 		   var hash = (this.hash ||'').replace(/^#/,'').split('&'),
 		       parsed = {};

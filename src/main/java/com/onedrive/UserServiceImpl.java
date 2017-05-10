@@ -223,16 +223,18 @@ public class UserServiceImpl implements UserService {
 		else{
 			fileReaderAndConverter(file, dir);
 		}
-		messageObject.setMessage(dir.getPath().toString());
+		messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
 		enterLinkView.addObject("message",messageObject );
 		
 		logger.info(enterLinkView);
 		
 	}
 	catch(Exception universalException){
-	
-logger.info("error occured" +universalException.getMessage());
-
+		SuccessMessageObject messageObject= new SuccessMessageObject();
+		messageObject.setMessage(universalException.getMessage());
+		enterLinkView.addObject("message",messageObject );
+        logger.info("error occured" +universalException.getMessage());
+        return enterLinkView;
 
 	}
 	return enterLinkView;	

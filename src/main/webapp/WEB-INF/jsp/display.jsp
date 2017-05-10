@@ -15,7 +15,7 @@
     font-family: serif;
     font-style: italic;
     font-feature-settings: initial;
-    color: rgba(169, 66, 66, 0.98);">Your files are down-loaded in to ${message.message}</h1>
+    color: rgba(169, 66, 66, 0.98);">${message.message}</h1>
      </div>
 
 
@@ -24,14 +24,14 @@ function myFunction(message,error) {
 
 
    if(message.message){
-	   return "Your files are down-loaded in to"+ ${message.message};
+	   return ${message.message};
  }
    else if(error){
 	   var textmessage = ${error.code}+" " +${error.message};
 	   return textmessage;
    }
    else{
-	   return "Please check the link and the folder name and retry ";
+	   return "check the logs for the error returned ";
    }
 }
 var messageobtained =${message};
