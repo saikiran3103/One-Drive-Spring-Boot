@@ -168,15 +168,16 @@ public class UserServiceImpl implements UserService {
 
 		SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(completeurl, tokenheader);
 		
+		logger.info(responseAndMessage);
 		
 		String responseFromAdaptor= responseAndMessage.getResponse();
 		
 		final Gson gson = new Gson();
 		
 		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-			Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+		//	ErrorMessage errorMessage = gson.fromJson(responseFromAdaptor, ErrorMessage.class);
 			ModelAndView errorView = new ModelAndView();
-			errorView.addObject("error", errorMessage);
+			errorView.addObject("error",responseFromAdaptor );
 			errorView.setViewName("display");
 			return errorView;
 		}
@@ -234,7 +235,7 @@ public class UserServiceImpl implements UserService {
 		SuccessMessageObject messageObject= new SuccessMessageObject();
 		messageObject.setMessage(universalException.getMessage());
 		enterLinkView.addObject("message",messageObject );
-        logger.info("error occured" +universalException.getMessage());
+        logger.info("error occured" +universalException.getLocalizedMessage());
         return enterLinkView;
 
 	}
