@@ -43,15 +43,18 @@
     margin-top: 85px;
     ">Use the button below to connect to Office 365.</p>
     </div>
-				
+		<div style="text-align:center" >
+		<button style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;"  onclick="window.location.href='https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.read.all&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect';">Connect to Office 365</button>
+</div>
+<!--  	
  <form action="token" method="GET">
 
 <div style="text-align:center" >
-<input type="submit" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Connect to Office 365"></div>
-</form>
-				
-					
-			</div>
+<input type="submit" 
+style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Connect to Office 365"></div>
+</form>-->
+				</div>
+			
  </div>
 <spring:url value="/resources/core/css/hello.js" var="coreJs" />
 <spring:url value="/resources/core/css/bootstrap.min.js" var="bootstrapJs" />

@@ -71,33 +71,43 @@ public class UserServiceImpl implements UserService {
 
 		String url="https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.read.all&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect";
 		String os = System.getProperty("os.name").toLowerCase();
-		try {
-
-			Runtime rt = Runtime.getRuntime();
-			if(os.indexOf( "win" ) >= 0){
-
-
-				rt.exec( "rundll32 url.dll,FileProtocolHandler " + url);
-
-			}
-			else if(os.indexOf( "mac" ) >= 0){
+	try {
+		
+		
+		
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+		final HttpGet httpRequest = new HttpGet( url );
 
 
-				rt.exec( "open" + url);
-			}
-
-
-			else if(os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0){
-				String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
-						"netscape","opera","links","lynx"};
-
-				StringBuffer cmd = new StringBuffer();
-				for (int i=0; i<browsers.length; i++)
-					cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
-
-				rt.exec(new String[] { "sh", "-c", cmd.toString() });
-			}
-		}catch(Exception ex){
+		logger.info(httpRequest);
+		
+		HttpResponse response = httpClient.execute(httpRequest);
+//
+//			Runtime rt = Runtime.getRuntime();
+//			if(os.indexOf( "win" ) >= 0){
+//
+//
+//				rt.exec( "rundll32 url.dll,FileProtocolHandler " + url);
+//
+//			}
+//			else if(os.indexOf( "mac" ) >= 0){
+//
+//
+//				rt.exec( "open" + url);
+//			}
+//
+//
+//			else if(os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0){
+//				String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
+//						"netscape","opera","links","lynx"};
+//
+//				StringBuffer cmd = new StringBuffer();
+//				for (int i=0; i<browsers.length; i++)
+//					cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
+//
+//				rt.exec(new String[] { "sh", "-c", cmd.toString() });
+		
+	}catch(Exception ex){
 			logger.error(" error occured"  + ex.getMessage());
 			ex.printStackTrace();
 		}

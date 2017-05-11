@@ -9,6 +9,7 @@ com\onedrive\SuccessMessageObject.class
 com\onedrive\ErrorMessage.class
 com\onedrive\User.class
 com\onedrive\InnerError.class
+com\onedrive\Error.class
 com\onedrive\Folder.class
 com\onedrive\TokenAndPath.class
 com\onedrive\ParallelConverter.class
