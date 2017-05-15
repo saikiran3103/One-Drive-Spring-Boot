@@ -31,8 +31,12 @@
   
 </article>
 <div style="text-align:center"> 
-<form name="myForm" action="path" method="POST">
-Enter the shared  One drive URL :<input id="text1" type="text" >
+<form name="myForm" action="path" method="POST" style="
+    color: #0012ff;
+    font-style: italic;
+    font-size: x-large;
+">
+Enter the shared  One drive URL for personal items :<input id="text1" type="text" >
 <input id="param1" type="hidden" name="param1" value="Test">
 <input id="param2" type="hidden" name="param2" value="Test2">
 <input type="button" id="downloadbutton" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Download And Convert" onclick="submitform();">
@@ -41,14 +45,21 @@ Enter the shared  One drive URL :<input id="text1" type="text" >
 </div>
 <br/>
 <div style="text-align:center"> 
-<form name="myForm" action="path" method="POST">
-Enter the shared  One drive URL :<input id="text1" type="text" >
+<form name="myForm" action="path" method="POST" style="
+    color: #0012ff;
+    font-style: italic;
+    font-size: x-large;
+">
+Enter the shared  One drive URL for shared items :<input id="text1" type="text" >
 <input id="param1" type="hidden" name="param1" value="Test">
 <input id="param2" type="hidden" name="param2" value="Test2">
 <input type="button" id="downloadbutton" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Download And Convert" onclick="submitform();">
 
 </form>
 </div>
+
+
+
 
  <div style="text-align:center">  <h1 style="
     font-size: 26pt;
