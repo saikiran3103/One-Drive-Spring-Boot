@@ -36,7 +36,7 @@
     font-style: italic;
     font-size: x-large;
 ">
-Enter the shared  One drive URL for personal items :<input id="text1" type="text" >
+Enter the shared  One drive URL for <b>personal</b> items :<input id="text1" type="text" >
 <input id="param1" type="hidden" name="param1" value="Test">
 <input id="param2" type="hidden" name="param2" value="Test2">
 <input type="button" id="downloadbutton" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Download And Convert" onclick="submitform();">
@@ -50,7 +50,7 @@ Enter the shared  One drive URL for personal items :<input id="text1" type="text
     font-style: italic;
     font-size: x-large;
 ">
-Enter the shared  One drive URL for shared items :<input id="text1" type="text" >
+Enter the shared  One drive URL for <b>shared</b> items :<input id="text1" type="text" >
 <input id="param1" type="hidden" name="param1" value="Test">
 <input id="param2" type="hidden" name="param2" value="Test2">
 <input type="button" id="downloadbutton" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" value="Download And Convert" onclick="submitform();">
