@@ -42,6 +42,29 @@
 <input id="param2" type="hidden" name="param2" value="Test2">
 <input type="button" id="downloadbutton" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" Value="Download And Convert" onclick="submitform();">
 </form>
+
+</div>
+
+<div style="text-align:center"> 
+<form name="myForm2" action="shareditems" method="POST">
+<p style="
+ 
+ 
+    font-size: 22pt;
+    font-style: italic;
+    font-feature-settings: initial;
+    color: #f3185d;
+    width: 1545px;
+    margin-top: 85px;
+    ">Enter the shared  One drive URL for shared items :</p>
+    
+     <input id="textshared" type="text" >
+<!-- <input id="param1" type="hidden" name="param1" value="Test"> -->
+<input id="param3" type="hidden" name="param3" value="Test3">
+<input type="button" id="downloadbutton2" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" Value="Download And Convert" onclick="submitform2();">
+</form>
+
+
 </div>
 	<div id="loader"></div>
 <div id="searchingimageDiv" style="display:none">
@@ -90,6 +113,51 @@ function submitform(){
 		  
 
 }
+
+
+function submitform2(){
+	
+	$("#downloadbutton2").hide();
+	$("p").hide();
+	$("#textshared").hide();
+	document.getElementById('headingmessage').innerHTML ='Your files are being downloaded and processed !';
+	    
+	var oimageDiv=document.getElementById('searchingimageDiv') ;
+	//set display to inline if currently none, otherwise to none 
+	oimageDiv.style.display=(oimageDiv.style.display=='none')?'inline':'none' 
+			
+		var oimageDiv=document.getElementById('loader') ;
+	//set display to inline if currently none, otherwise to none 
+	oimageDiv.style.display=(oimageDiv.style.display=='none')?'inline':'none' 
+	
+	document.getElementById("param3").value = document.getElementById("textshared").value;
+	/*get the token value from header*/
+	window.location.parseHash = function(){
+		   var hash = (this.hash ||'').replace(/^#/,'').split('&'),
+		       parsed = {};
+
+		   for(var i =0,el;i<hash.length; i++ ){
+		        el=hash[i].split('=')
+		        parsed[el[0]] = el[1];
+		   }
+		   return parsed;
+		};
+		
+	
+		 
+
+		/* var obj= location.parseHash();
+		    obj.hash;  //fdg 
+		    document.getElementById("param1").value = obj.access_token;   //value2 */
+		    document.myForm2.submit();
+		    $(window).load(function() {
+		        $('#loader').show();
+		     });
+		  
+
+}
+
+
 
 </script>
 

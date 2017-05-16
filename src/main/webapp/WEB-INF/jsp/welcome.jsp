@@ -45,7 +45,7 @@ Enter the shared  One drive URL for <b>personal</b> items :<input id="text1" typ
 </div>
 <br/>
 <div style="text-align:center"> 
-<form name="myForm" action="path" method="POST" style="
+<form name="myForm2" action="path" method="POST" style="
     color: #0012ff;
     font-style: italic;
     font-size: x-large;

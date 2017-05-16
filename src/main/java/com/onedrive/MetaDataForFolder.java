@@ -65,8 +65,8 @@ public class MetaDataForFolder implements Serializable{
 	     * The parent folder reference.
 	     */
 	    private ParentReference parentReference;
-
-	    /**
+	
+	     /**
 	     * The raw JSON which is received from the OneDrive API.
 	     */
 	    private String rawJson = "";

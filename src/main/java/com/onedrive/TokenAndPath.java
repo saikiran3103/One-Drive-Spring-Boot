@@ -3,9 +3,13 @@ package com.onedrive;
 public class TokenAndPath {
 
 	
-private String token;
+     private String token;
 	
 	private String path;
+	
+	private String driveId;
+	
+	private String userName;
 
 	/**
 	 * @return the token
@@ -35,11 +39,28 @@ private String token;
 		this.path = path;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getDriveId() {
+		return driveId;
+	}
+
+	public void setDriveId(String driveId) {
+		this.driveId = driveId;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "TokenAndPath [token=" + token + ", path=" + path + "]";
+		return "TokenAndPath [token=" + token + ", path=" + path + ", driveId=" + driveId + ", userName=" + userName
+				+ "]";
 	}
 }

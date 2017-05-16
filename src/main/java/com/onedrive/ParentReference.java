@@ -1,7 +1,5 @@
 package com.onedrive;
 
-
-
 public class ParentReference {
 
 	
@@ -20,7 +18,7 @@ public class ParentReference {
     public String getId() {
         return id;
     }
-
+   
     public void setId(String id) {
         this.id = id;
     }
@@ -32,4 +30,12 @@ public class ParentReference {
     public void setPath(String path) {
         this.path = path;
     }
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "ParentReference [driveId=" + driveId + ", id=" + id + ", path=" + path + "]";
+	}
 }

@@ -13,5 +13,13 @@ public interface UserService {
 	
 	public String authorizeAndGetUserToken() throws URISyntaxException;
 
-	public ModelAndView  finaldownload(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
+	public ModelAndView  personalItemsDownloadAndConvert(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
+
+	public ModelAndView  sharedItemsDownloadAndConvert(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
+
+	
+
+public	ModelAndView listSharedUsers(TokenAndPath tokenAndPath) throws IOException, IllegalStateException,
+			JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
+
 }

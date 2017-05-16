@@ -98,10 +98,10 @@ public class HelloController {
 			return "welcome";
 		}
 
-		@RequestMapping(method = RequestMethod.POST, value="download")
-	    public ModelAndView   finaldownload(TokenAndPath tokenAndPath ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
-			return service.finaldownload(tokenAndPath);
-		}
+//		@RequestMapping(method = RequestMethod.POST, value="download")
+//	    public ModelAndView   finaldownload(TokenAndPath tokenAndPath ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+//			return service.finaldownload(tokenAndPath);
+//		}
 		
 		
 		/* final Method to download the files
@@ -110,9 +110,12 @@ public class HelloController {
 		 * 
 		 */
 		@RequestMapping(method = RequestMethod.POST, value="onedrive/path1")
-	    public ModelAndView getFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+	    public ModelAndView getPersonalFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 //			System.out.println(request.getParameter("param1"));
 			System.out.println(request.getParameter("param2"));
+			
+			
+			logger.info("HttpServletRequest"+request);
 			HttpSession session = request.getSession();
 			logger.info("Request"+request.toString());
 			System.out.println(session.getAttribute("token"));
@@ -120,10 +123,56 @@ public class HelloController {
 			tokenAndPath.setToken((String)session.getAttribute("token"));
 			tokenAndPath.setPath(request.getParameter("param2"));
 			logger.info("accesstoken: "+session.getAttribute("token"));
-			return service.finaldownload(tokenAndPath);
+			return service.personalItemsDownloadAndConvert(tokenAndPath);
+			
+		}
+		// method to display the list of user names for the shared files
+		
+		@RequestMapping(method = RequestMethod.POST, value="onedrive/shareditems")
+	    public ModelAndView getSharedUsers(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+//			System.out.println(request.getParameter("param1"));
+			System.out.println(request.getParameter("param2"));
+			HttpSession session = request.getSession();
+			session.setAttribute("sharedItemUrl", request.getParameter("param2"));
+			logger.info("Request"+request.toString());
+			logger.info("In onedrive/shareditems" );
+
+			System.out.println(session.getAttribute("token"));
+			TokenAndPath tokenAndPath=new TokenAndPath();
+			tokenAndPath.setToken((String)session.getAttribute("token"));
+			tokenAndPath.setPath(request.getParameter("param2"));
+			logger.info("accesstoken: "+session.getAttribute("token"));
+			return service.listSharedUsers(tokenAndPath);
 			
 		}
 		
+		// method to download and convert the shared files 
+		
+		@RequestMapping(method = RequestMethod.POST, value="onedrive/downloadSharedFiles")
+	    public ModelAndView getSharedFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+//			System.out.println(request.getParameter("param1"));
+			System.out.println(request.getParameter("param2"));
+			HttpSession session = request.getSession();
+			session.setAttribute("sharedItemUrl", request.getParameter("param2"));
+			logger.info("Request"+request.toString());
+			logger.info("In onedrive/shareditems" );
+
+			System.out.println(session.getAttribute("token"));
+			TokenAndPath tokenAndPath=new TokenAndPath();
+			tokenAndPath.setToken((String)session.getAttribute("token"));
+			
+			// set the user name
+			tokenAndPath.setUserName(request.getParameter("param2"));
+			
+			//take the path from the seesion stored in the previous call
+			tokenAndPath.setPath((String)session.getAttribute("sharedItemUrl"));
+			logger.info("accesstoken: "+session.getAttribute("token"));
+			return service.sharedItemsDownloadAndConvert(tokenAndPath);
+			
+		}
+		
+		
+		//method to redirect to hide the token
 		@RequestMapping(method = RequestMethod.POST, value="onedrive/path")
 	    public String getTokenAndPath1(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 			HttpSession session = request.getSession();

@@ -1,11 +1,7 @@
 package com.onedrive;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -15,13 +11,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -29,27 +29,15 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.poi.POIXMLProperties.CoreProperties;
-import org.apache.poi.hssf.extractor.ExcelExtractor;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.log4j.Logger;
 import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTextShape;
-import org.apache.poi.xssf.extractor.XSSFExcelExtractor;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.xmlbeans.XmlException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 
 
 @Controller
@@ -82,31 +70,32 @@ public class UserServiceImpl implements UserService {
 		logger.info(httpRequest);
 		
 		HttpResponse response = httpClient.execute(httpRequest);
-//
-//			Runtime rt = Runtime.getRuntime();
-//			if(os.indexOf( "win" ) >= 0){
-//
-//
-//				rt.exec( "rundll32 url.dll,FileProtocolHandler " + url);
-//
-//			}
-//			else if(os.indexOf( "mac" ) >= 0){
-//
-//
-//				rt.exec( "open" + url);
-//			}
-//
-//
-//			else if(os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0){
-//				String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
-//						"netscape","opera","links","lynx"};
-//
-//				StringBuffer cmd = new StringBuffer();
-//				for (int i=0; i<browsers.length; i++)
-//					cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
-//
-//				rt.exec(new String[] { "sh", "-c", cmd.toString() });
+
+			Runtime rt = Runtime.getRuntime();
+			if(os.indexOf( "win" ) >= 0){
+
+
+				rt.exec( "rundll32 url.dll,FileProtocolHandler " + url);
+
+			}
+			else if(os.indexOf( "mac" ) >= 0){
+
+
+				rt.exec( "open" + url);
+			}
+
+
+			else if(os.indexOf( "nix") >=0 || os.indexOf( "nux") >=0){
+				String[] browsers = {"epiphany", "firefox", "mozilla", "konqueror",
+						"netscape","opera","links","lynx"};
+
+				StringBuffer cmd = new StringBuffer();
+				for (int i=0; i<browsers.length; i++)
+					cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
+
+				rt.exec(new String[] { "sh", "-c", cmd.toString() });
 		
+	}
 	}catch(Exception ex){
 			logger.error(" error occured"  + ex.getMessage());
 			ex.printStackTrace();
@@ -119,19 +108,109 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ModelAndView finaldownload(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
+	public ModelAndView personalItemsDownloadAndConvert(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
 
 		ModelAndView enterLinkView = new ModelAndView();
 	try{
 		
 		SuccessMessageObject messageObject= new SuccessMessageObject();
 		
+		String access_token= tokenAndPath.getToken();
 		
+		String tokenheader = "Bearer"+" "+access_token;
+		
+		URL url= new URL(tokenAndPath.getPath());
+		
+		String fileUrl=tokenAndPath.getPath();
+		
+		if(fileUrl.contains("?")){
+			int indexOfQueryParam = fileUrl.indexOf("?");
+			
+			 fileUrl= fileUrl.substring(0, indexOfQueryParam);
+		}
+		
+		
+		// path for the single file
+		if((fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".PDF")) || (fileUrl.endsWith(".DOCS"))|| (fileUrl.endsWith(".docs")) 
+				|| (fileUrl.endsWith(".DOCX"))|| (fileUrl.endsWith(".docx")) || (fileUrl.endsWith(".pptx")) || (fileUrl.endsWith(".PPTX")) || 
+				(fileUrl.endsWith(".PPT")) || (fileUrl.endsWith(".ppt"))
+				|| (fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".xlsx")) || (fileUrl.endsWith(".XLSX")) || (fileUrl.endsWith(".xls")) ||
+				(fileUrl.endsWith(".XLS"))){
+			
+			
+		
+			
+			String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
+
+			// gets the start index after the documents path
+			int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+
+
+			String file = base_path.substring(indexAfterDocuments);
+			
+		String oneDriveFileUrl ="https://graph.microsoft.com/beta/me/drive/root:/"+file;
+		
+		int local_directory =file.lastIndexOf("/")+1;
+		
+		String local_folder = file.substring(local_directory);
+		
+		String MakeLocalDirectory =local_folder.replace("%20", " ");
+		
+		
+		int indexToRemoveExntension = MakeLocalDirectory.lastIndexOf(".");
+		
+		String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
+
+		
+		File dir = new File(saveDir+"\\Downloads\\"+extensionLessDirectory);
+	
+	    dir.mkdirs();
+		
+		SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(oneDriveFileUrl, tokenheader);
+		
+		String responseFromAdaptor= responseAndMessage.getResponse();
+		
+          final Gson gson = new Gson();
+		
+		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+			Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+			ModelAndView errorView = new ModelAndView();
+			errorView.addObject("error", errorMessage);
+			errorView.setViewName("display");
+			return errorView;
+		}
+		
+		MetaDataForFolder outerMetaData =gson.fromJson(responseFromAdaptor, MetaDataForFolder.class);
+		
+		
+		
+	
+		
+				String Url = outerMetaData.getMicrosoft_graph_downloadUrl();
+				
+		
+		
+
+		
+		UserServiceImpl.downloadFile(Url,dir.getPath());
+		
+		
+		
+		fileReaderAndConverter(file, dir);
+		
+		messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
+		enterLinkView.addObject("message",messageObject );
+		enterLinkView.setViewName("display");
+		
+		return enterLinkView;
+		
+			
+		}
 		
 		enterLinkView.setViewName("display");
-		String access_token= tokenAndPath.getToken();
+		
 
-		String tokenheader = "Bearer"+" "+access_token;
+		
 
 
 
@@ -232,6 +311,8 @@ public class UserServiceImpl implements UserService {
 		concurrentConverter(file, dir, executor);
 		}
 		else{
+			
+			// check usage and 
 			fileReaderAndConverter(file, dir);
 		}
 		messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
@@ -426,7 +507,7 @@ public class UserServiceImpl implements UserService {
 		httpRequest.addHeader("Content-Type", "text/plain");
 		httpRequest.addHeader("Authorization", tokenheader);
 
-		logger.info(httpRequest);
+		logger.info(httpRequest.getMethod());
 		
 		HttpResponse response = httpClient.execute(httpRequest);
 		
@@ -435,6 +516,7 @@ public class UserServiceImpl implements UserService {
 		if ( null == response )	{
 			logger.error( "Http Request failed, httpResponse is null." );
 			messageObject.setMessage("error");
+			logger.error("HTTP response is null");
 			releaseHttpConnection( httpRequest );
 			
 		}
@@ -442,6 +524,7 @@ public class UserServiceImpl implements UserService {
 		if ( null == response.getStatusLine() )	{
 			logger.error( "Http Request failed, httpResponse is null." );
 			messageObject.setMessage("error");
+			logger.error("HTTP getStatusLine response is null");
 			releaseHttpConnection( httpRequest );
 			
 		}
@@ -492,222 +575,195 @@ public class UserServiceImpl implements UserService {
 	}
 
 
-	// single thread to convert office files to txt format
-	private void convertToText(File officefile,String file) throws FileNotFoundException, IOException {
-		officefile.getAbsolutePath();
-		System.out.println("Rading file "+officefile.getName());
-		officefile.getName();
+	@Override
+	public ModelAndView listSharedUsers(TokenAndPath tokenAndPath)
+			throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException,
+			OpenXML4JException, XmlException {
+		
+		
+		
+		ModelAndView enterLinkView = new ModelAndView();
+		try{
+			
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			
+			
+			
+			enterLinkView.setViewName("test1");
+			String access_token= tokenAndPath.getToken();
 
-		System.out.println("officefile.getAbsoluteFile().getParentFile()"+officefile.getAbsoluteFile().getParentFile());
-		System.out.println("officefile.getAbsolutePath();"+officefile.getAbsolutePath());
-		System.out.println("officefile.getAbsoluteFile().getParentFile()"+officefile.getAbsoluteFile().getParent());
+			String tokenheader = "Bearer"+" "+access_token;
 
-		int nameIndex=officefile.getName().lastIndexOf(".");
-		String textNaming1=officefile.getName().substring(0, nameIndex);
-		textNaming1.concat(".txt");
 
-		System.out.println("testing sai"+officefile.getParent()+"officefile.getPath()");
-		File textdirectory= new File(officefile.getParent()+"\\"+file+" TextFolder\\");
-		textdirectory.mkdir();
-		int index = officefile.getAbsolutePath().lastIndexOf(".");
-		String textdirectoryString =textdirectory.getPath()+"\\"+textNaming1;   
 
-		System.out.println("officefile.getAbsolutePath().substring(index)"+officefile.getAbsolutePath().substring(index));
+			String urlForSharedWithMeItems ="https://graph.microsoft.com/beta/me/drive/sharedWithMe";
 
-		final String FILENAME = textdirectoryString;
-		if (!officefile.exists()) {
-			System.out.println("Sorry does not Exists!");
+		
+
+
+
+
+			//make a get call to one drive api
+			
+			
+			
+
+
+			SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(urlForSharedWithMeItems, tokenheader);
+			
+			
+			String responseFromAdaptor= responseAndMessage.getResponse();
+			
+			final Gson gson = new Gson();
+			
+			
+			
+			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+				Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+				ModelAndView errorView = new ModelAndView();
+				errorView.addObject("error", errorMessage);
+				errorView.setViewName("display");
+				return errorView;
+			}
+			
+			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
+			
+			HashMap<String, User> namesOfAllSharingUsers = new HashMap<String, User>();
+			
+			Set<String> displayNames = new HashSet<String>();
+			
+			HashMap<String, String> namesAndDriveId = new HashMap<String, String>();
+			
+			for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
+				
+			//	String driveId =metaDataForFolder.getParentReference().getDriveId();
+				namesOfAllSharingUsers=	metaDataForFolder.getCreatedBy();
+			String driveId=	"b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+				Collection<User> users=namesOfAllSharingUsers.values();
+				Iterator<User> itr = 	users.iterator();
+				while(itr.hasNext()) {
+					User currentDriveUser = (User) itr.next();
+					displayNames.add(currentDriveUser.getDisplayName());
+					namesAndDriveId.put(currentDriveUser.getDisplayName(), driveId);
 		}
-		//else
-		{
-			if (officefile.getName().endsWith(".docx") || officefile.getName().endsWith(".DOCX")) {
-				//	FileInputStream in=new FileInputStream(officefile);
-
-				String Content=(new XWPFWordExtractor(new XWPFDocument(new FileInputStream(officefile))).getText());
-
-
-				try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME))) {
-
-
-
-					bw.write(Content);
-
-					// no need to close it.
-					//bw.close();
-
-					System.out.println("Done");
-
-				} catch (IOException e) {
-
-					e.printStackTrace();
-
-				}
-
-				//	XWPFDocument doc = new XWPFDocument(in);
-				//	XWPFWordExtractor ex = new XWPFWordExtractor(doc);
-				//	out.write(ex.getText());
-				//out.write(new XWPFWordExtractor(new XWPFDocument(new FileInputStream(officefile))).getText());
-
-			} 
-
-
-			else if (officefile.getName().endsWith(".doc") || officefile.getName().endsWith(".DOC")) {
-				//	FileInputStream in=new FileInputStream(officefile);
-
-				wd = new WordExtractor(new FileInputStream(officefile));
-				String Content = wd.getText();
-
-
-
-
-				try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME))) {
-
-
-
-					bw.write(Content);
-
-					// no need to close it.
-					//bw.close();
-
-					System.out.println("Done");
-
-				} catch (IOException e) {
-
-					e.printStackTrace();
-
-				}
-
-				//	XWPFDocument doc = new XWPFDocument(in);
-				//	XWPFWordExtractor ex = new XWPFWordExtractor(doc);
-				//	out.write(ex.getText());
-				//out.write(new XWPFWordExtractor(new XWPFDocument(new FileInputStream(officefile))).getText());
-
-			} 
-			else if (officefile.getName().endsWith(".xlsx") || officefile.getName().endsWith(".XLSX")) {
-				String Content=new XSSFExcelExtractor(new XSSFWorkbook(new FileInputStream(officefile))).getText();
-				try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME))) {
-
-
-
-					bw.write(Content);
-
-					// no need to close it.
-					//bw.close();
-
-					System.out.println("Done");
-
-				} catch (IOException e) {
-
-					e.printStackTrace();
-
-				}
-			}
-
-			else if(officefile.getName().endsWith(".xls")|| officefile.getName().endsWith(".XLS")){
-				ExcelExtractor wd = new ExcelExtractor(new HSSFWorkbook(new FileInputStream(officefile)));
-				String Content= wd.getText();
-				wd.close();
-				try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME))) {
-
-
-
-					bw.write(Content);
-
-					// no need to close it.
-					//bw.close();
-
-					System.out.println("Done");
-
-				} catch (IOException e) {
-
-					e.printStackTrace();
-
-				}
-			}
-			else if (officefile.getName().endsWith(".ppt") || officefile.getName().endsWith(".PPT")|| officefile.getName().endsWith(".PPTX")
-					|| officefile.getName().endsWith(".pptx")){
-				XMLSlideShow ppt = new XMLSlideShow(new FileInputStream(officefile)); 
-
-				CoreProperties props = ppt.getProperties().getCoreProperties();
-				String title = props.getTitle();
-				System.out.println("Title: " + title);
-
-				for (XSLFSlide slide: ppt.getSlides()) {
-					System.out.println("Starting slide...");
-					XSLFShape[] shapes = slide.getShapes();
-
-					for (XSLFShape shape: shapes) {
-						if (shape instanceof XSLFTextShape) {
-							XSLFTextShape textShape = (XSLFTextShape)shape;
-							String Content = textShape.getText();
-							System.out.println("Text: " + Content);
-							try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME,true))) {
-
-
-
-								bw.write(Content);
-
-								// no need to close it.
-								//bw.close();
-
-								System.out.println("Done");
-
-
-
-							} catch (IOException e) {
-
-								e.printStackTrace();
-
-							}
-
 						}
-					}
 
-				}
-			}
+			enterLinkView.setViewName("shareduserslist");
+			enterLinkView.addObject("sharedusers", namesAndDriveId);
+			System.out.println("json form ");
+			System.out.println(outerMetaData);
 
-
-			else if (officefile.getName().endsWith(".pdf") || officefile.getName().endsWith(".PDF")) {
-				//use file.renameTo() to rename the file
-
-
-
-				PdfReader pdfReader= new PdfReader(officefile.getAbsolutePath());
-				PdfReaderContentParser parser = new PdfReaderContentParser(pdfReader);
-
-				TextExtractionStrategy strategy;
-
-				for (int i = 1; i <= pdfReader.getNumberOfPages(); i++) {
-					strategy = parser.processContent(i, new SimpleTextExtractionStrategy());
-					System.out.println("strategy.getResultantText()"+strategy.getResultantText());
-					String Content=(strategy.getResultantText());
-					try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME,true))) {
-
-
-
-						bw.write(Content);
-
-						// no need to close it.
-						//bw.close();
-
-						System.out.println("Done");
-
-					} catch (IOException e) {
-
-						e.printStackTrace();
-
-					}
-					pdfReader.close();
-
-				}
-
-
-
-
-
-
-
-			}
-		}
+		
+		
+	}catch(Exception universalException){
+		logger.error(universalException.getStackTrace());
+		SuccessMessageObject messageObject= new SuccessMessageObject();
+		messageObject.setMessage(universalException.getMessage());
+		enterLinkView.addObject("message",messageObject );
+        logger.error("error occured" +universalException.getCause());
+        return enterLinkView;
 	}
-}
+		return enterLinkView;
+	}
+
+	@Override
+	public ModelAndView sharedItemsDownloadAndConvert(TokenAndPath tokenAndPath)
+			throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException,
+			OpenXML4JException, XmlException {
+		
+		ModelAndView enterLinkView = new ModelAndView();
+		try{
+			
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			
+			tokenAndPath.setPath("https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test");
+			
+			enterLinkView.setViewName("display");
+			String access_token= tokenAndPath.getToken();
+
+			String tokenheader = "Bearer"+" "+access_token;
+
+
+			
+			String driveId = tokenAndPath.getDriveId();
+
+			String commonUrl ="https://graph.microsoft.com/beta/drives";
+
+			//	String base_path = "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
+			String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
+
+			// gets the start index after the documents path
+			int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+
+
+			String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
+
+			int local_directory =folderPathAfterdocuments.lastIndexOf("/")+1;
+			
+			
+			String local_folder = folderPathAfterdocuments.substring(local_directory);
+			
+
+			String childAppender =":/children";
+
+			String MakeLocalDirectory =local_folder.replace("%20", " ");
+
+
+			String completeurl= commonUrl+driveId+"/root:"+folderPathAfterdocuments+childAppender;
+
+			System.out.println("saiiii"+""+folderPathAfterdocuments);
+
+
+			//making a directory
+			File dir = new File(saveDir+"\\Downloads\\"+MakeLocalDirectory);
+			dir.mkdirs();
+
+
+			System.out.println(completeurl);
+
+
+
+
+
+			//make a get call to one drive api
+			
+			
+			SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(completeurl, tokenheader);
+			
+			
+			String responseFromAdaptor= responseAndMessage.getResponse();
+			
+			final Gson gson = new Gson();
+			
+			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+				Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+				ModelAndView errorView = new ModelAndView();
+				errorView.addObject("error", errorMessage);
+				errorView.setViewName("display");
+				return errorView;
+			}
+			
+			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
+
+			System.out.println("json form ");
+			System.out.println(outerMetaData);
+			List<String> downloadUrls = new ArrayList<String>();
+			for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
+
+				if(metaDataForFolder.getFolder()!=null &&
+						(Integer.parseInt(metaDataForFolder.getFolder().getChildCount())>=0)){
+					readingInnerFolders(tokenheader, commonUrl,base_path, childAppender, folderPathAfterdocuments, dir, gson, metaDataForFolder);
+				}else{
+					String Url = metaDataForFolder.getMicrosoft_graph_downloadUrl();
+					downloadUrls.add(Url);
+				}
+			}
+		
+		
+		
+		
+	}	catch(Exception ex){
+		logger.error(ex.getMessage());
+	}
+		return null;
+}}
