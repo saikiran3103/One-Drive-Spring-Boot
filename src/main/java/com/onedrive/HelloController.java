@@ -148,7 +148,7 @@ public class HelloController {
 		
 		// method to download and convert the shared files 
 		
-		@RequestMapping(method = RequestMethod.POST, value="onedrive/downloadSharedFiles")
+		@RequestMapping(method = RequestMethod.POST, value="onedrive/downloadsharedfiles")
 	    public ModelAndView getSharedFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 //			System.out.println(request.getParameter("param1"));
 			System.out.println(request.getParameter("param2"));

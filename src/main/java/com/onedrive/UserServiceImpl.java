@@ -393,7 +393,7 @@ public class UserServiceImpl implements UserService {
 		String responseFromAdaptor1=messageObject.getResponse();
 		
 		if(messageObject.getMessage()!=null && messageObject.getMessage().equalsIgnoreCase("error")){
-			ErrorMessage errorMessage = gson.fromJson(responseFromAdaptor1, ErrorMessage.class);
+			Error errorMessage = gson.fromJson(responseFromAdaptor1, Error.class);
 			ModelAndView errorView = new ModelAndView();
 			errorView.addObject("error", errorMessage);
 			
@@ -607,9 +607,7 @@ public class UserServiceImpl implements UserService {
 			
 			
 			
-
-
-			SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(urlForSharedWithMeItems, tokenheader);
+            SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(urlForSharedWithMeItems, tokenheader);
 			
 			
 			String responseFromAdaptor= responseAndMessage.getResponse();
@@ -626,7 +624,7 @@ public class UserServiceImpl implements UserService {
 				return errorView;
 			}
 			
-			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
+			OuterMetaDataForSharedItems outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaDataForSharedItems.class);
 			
 			HashMap<String, User> namesOfAllSharingUsers = new HashMap<String, User>();
 			
@@ -634,7 +632,7 @@ public class UserServiceImpl implements UserService {
 			
 			HashMap<String, String> namesAndDriveId = new HashMap<String, String>();
 			
-			for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
+			for (MetaDataForSharedItem metaDataForFolder:outerMetaData.getValue()){
 				
 			//	String driveId =metaDataForFolder.getParentReference().getDriveId();
 				namesOfAllSharingUsers=	metaDataForFolder.getCreatedBy();
@@ -679,6 +677,8 @@ public class UserServiceImpl implements UserService {
 			tokenAndPath.setPath("https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test");
 			
 			enterLinkView.setViewName("display");
+			
+			
 			String access_token= tokenAndPath.getToken();
 
 			String tokenheader = "Bearer"+" "+access_token;

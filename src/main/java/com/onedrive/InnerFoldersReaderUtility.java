@@ -53,7 +53,7 @@ public static void processAndDownloadSubFolders(String tokenheader, String commo
 	String responseFromAdaptor1= responseAndMessage.getResponse();
 	
 	if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-		ErrorMessage errorMessage = gson.fromJson(responseFromAdaptor1, ErrorMessage.class);
+		Error errorMessage = gson.fromJson(responseFromAdaptor1, Error.class);
 		ModelAndView errorView = new ModelAndView();
 		errorView.addObject("error", errorMessage);
 		

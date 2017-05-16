@@ -2,80 +2,37 @@ package com.onedrive;
 
 import java.io.Serializable;
 
-import com.google.gson.annotations.Expose;
-
-public class Error implements Serializable{
-	
+public class Error implements Serializable {
 	
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4133146300296311964L;
-
-	@Expose
-	private String code;
 	
-	@Expose
-	private String message;
+	private static final long serialVersionUID = 7687509918835761850L;
 	
-	@Expose
-	private InnerError innerError;
-
-
-	/**
-	 * @return the code
-	 */
-	public String getCode() {
-		return code;
-	}
-
+	
+	private ErrorInner error;
 
 	/**
-	 * @param code the code to set
+	 * @return the error
 	 */
-	public void setCode(String code) {
-		this.code = code;
+	public ErrorInner getError() {
+		return error;
 	}
-
 
 	/**
-	 * @return the message
+	 * @param error the error to set
 	 */
-	public String getMessage() {
-		return message;
+	public void setError(ErrorInner error) {
+		this.error = error;
 	}
-
-
-	/**
-	 * @param message the message to set
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-
-	/**
-	 * @return the innerError
-	 */
-	public InnerError getInnerError() {
-		return innerError;
-	}
-
-
-	/**
-	 * @param innerError the innerError to set
-	 */
-	public void setInnerError(InnerError innerError) {
-		this.innerError = innerError;
-	}
-
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "ErrorObject [code=" + code + ", message=" + message + ", innerError=" + innerError + "]";
+		return "s [error=" + error + "]";
 	}
 
 }

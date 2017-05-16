@@ -7,63 +7,52 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <title>shared users</title>
 </head>
-<body>
+<body  style="
+    text-align: center;
+    font-style: italic;
+    background-color: azure;
+    color: red;
+    font-size: larger;
+     padding-top: 119px;">
 
 
-
-
-<input type="radio" name="colors" value="red" id="myRadio">
-
+<form name="downloadSharedfilesForm" action="downloadsharedfiles" method="POST">
 
 <table>
-       <c:forEach items="${sharedusers}" var="user">
-       shared user="${user.key}"
+
+ <c:forEach items="${sharedusers}" var="user">
+<input type="radio" name="myRadio" value="${user.value}" id="myRadio"  >
+
+
+
+      
+       shared user-->"${user.key}"
         </c:forEach>
     </table>
 
 
-<form action="" method="POST">
-  <input type="hidden" name="q" value="a">
-</form>
 
-<button onclick="submitUser()">Confirm the User shared</button>
+ <input id="driveId" type="hidden" name="driveId" value="Test3">
+  
+ <input type="button" id="downloadbutton2" Value="Confirm the User shared"  onclick="submitUser();">
+</form>
+<br>
+
+
+
 
 
 
 <script>
 function submitUser() {
-    var x = document.getElementById("myRadio").value;
-    document.getElementById("demo").innerHTML = x;
-}
-
-<script>
-function myFunction(message,error) {
-
-
-   if(message.message){
-	   return ${message.message};
- }
-   else if(error){
-	   var textmessage = ${error.code}+" " +${error.message};
-	   return textmessage;
-   }
-   else{
-	   return "check the logs for the error returned ";
-   }
-}
-var messageobtained =${sharedusers};
-var errorObtained= ${error};
-document.getElementById("mymessage").innerHTML = myFunction(messageobtained, errorObtained); 
-
-function logMapElements(value, key, sharedusers) {
-    console.log(`m[${key}] = ${value}`);
+   
+	document.getElementById("driveId").value = document.getElementById("myRadio").value;
+	
+    document.downloadSharedfilesForm.submit();
+    
 }
 
 
-
-
-
-</script>
 
 
 </script>
