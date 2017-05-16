@@ -133,14 +133,16 @@ public class HelloController {
 //			System.out.println(request.getParameter("param1"));
 			System.out.println(request.getParameter("param2"));
 			HttpSession session = request.getSession();
-			session.setAttribute("sharedItemUrl", request.getParameter("param2"));
+			
+			
+			session.setAttribute("sharedItemUrl", request.getParameter("param3"));
 			logger.info("Request"+request.toString());
 			logger.info("In onedrive/shareditems" );
 
 			System.out.println(session.getAttribute("token"));
 			TokenAndPath tokenAndPath=new TokenAndPath();
 			tokenAndPath.setToken((String)session.getAttribute("token"));
-			tokenAndPath.setPath(request.getParameter("param2"));
+			tokenAndPath.setPath(request.getParameter("param3"));
 			logger.info("accesstoken: "+session.getAttribute("token"));
 			return service.listSharedUsers(tokenAndPath);
 			
@@ -153,19 +155,23 @@ public class HelloController {
 //			System.out.println(request.getParameter("param1"));
 			System.out.println(request.getParameter("param2"));
 			HttpSession session = request.getSession();
-			session.setAttribute("sharedItemUrl", request.getParameter("param2"));
+		
 			logger.info("Request"+request.toString());
 			logger.info("In onedrive/shareditems" );
-
+			 String driveId = request.getParameter("driveId");
+			 String sharedItemUrl = 	(String)session.getAttribute("sharedItemUrl");
+		    logger.info("Getting the files for the drive id  "+driveId );
 			System.out.println(session.getAttribute("token"));
 			TokenAndPath tokenAndPath=new TokenAndPath();
 			tokenAndPath.setToken((String)session.getAttribute("token"));
-			
-			// set the user name
-			tokenAndPath.setUserName(request.getParameter("param2"));
+			tokenAndPath.setDriveId(driveId);
 			
 			//take the path from the seesion stored in the previous call
-			tokenAndPath.setPath((String)session.getAttribute("sharedItemUrl"));
+			tokenAndPath.setPath(sharedItemUrl);
+			
+			
+			
+		
 			logger.info("accesstoken: "+session.getAttribute("token"));
 			return service.sharedItemsDownloadAndConvert(tokenAndPath);
 			

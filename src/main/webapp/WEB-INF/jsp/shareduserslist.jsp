@@ -46,7 +46,7 @@
 <script>
 function submitUser() {
    
-	document.getElementById("driveId").value = document.getElementById("myRadio").value;
+	document.getElementById("driveId").value =document.querySelector('input[name="myRadio"]:checked').value;
 	
     document.downloadSharedfilesForm.submit();
     

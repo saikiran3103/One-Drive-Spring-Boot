@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
 		
 		String tokenheader = "Bearer"+" "+access_token;
 		
-		URL url= new URL(tokenAndPath.getPath());
+		
 		
 		String fileUrl=tokenAndPath.getPath();
 		
@@ -312,7 +312,7 @@ public class UserServiceImpl implements UserService {
 		}
 		else{
 			
-			// check usage and 
+			// for empty urls just convert the files
 			fileReaderAndConverter(file, dir);
 		}
 		messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
@@ -335,7 +335,7 @@ public class UserServiceImpl implements UserService {
 
 	private void concurrentConverter(String file, File dir, ExecutorService executor)
 			throws InterruptedException, IOException {
-		if(  (executor.awaitTermination(60, TimeUnit.SECONDS) )){
+		if(  (executor.awaitTermination(900, TimeUnit.SECONDS) )){
 			fileReaderAndConverter(file, dir);
 		}
 	}
@@ -674,7 +674,7 @@ public class UserServiceImpl implements UserService {
 			
 			SuccessMessageObject messageObject= new SuccessMessageObject();
 			
-			tokenAndPath.setPath("https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test");
+		
 			
 			enterLinkView.setViewName("display");
 			
@@ -687,7 +687,7 @@ public class UserServiceImpl implements UserService {
 			
 			String driveId = tokenAndPath.getDriveId();
 
-			String commonUrl ="https://graph.microsoft.com/beta/drives";
+			String commonUrl ="https://graph.microsoft.com/beta";
 
 			//	String base_path = "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
 			String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
@@ -709,7 +709,7 @@ public class UserServiceImpl implements UserService {
 			String MakeLocalDirectory =local_folder.replace("%20", " ");
 
 
-			String completeurl= commonUrl+driveId+"/root:"+folderPathAfterdocuments+childAppender;
+			String completeurl= commonUrl+"/drives/"+driveId+"/root:/"+folderPathAfterdocuments+childAppender;
 
 			System.out.println("saiiii"+""+folderPathAfterdocuments);
 
@@ -732,6 +732,8 @@ public class UserServiceImpl implements UserService {
 			
 			
 			String responseFromAdaptor= responseAndMessage.getResponse();
+			
+			logger.info(responseFromAdaptor);
 			
 			final Gson gson = new Gson();
 			
@@ -759,11 +761,43 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		
+			// create the size of the thread pool dynamically
+			if(!downloadUrls.isEmpty()){
+			ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
+			final long startTime = System.currentTimeMillis();
+			for (String downloadUrl:downloadUrls){
+
+				System.out.println("saveDir------>"+saveDir);			
+				// multithreading framework for downloading files
+				Runnable download= new MultiDownLoadExecutor(downloadUrl, dir.getPath());
+				executor.execute(download);
+			}
+			executor.shutdown();
+			
+			final long endTime = System.currentTimeMillis();
+			System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
+
+			concurrentConverter(folderPathAfterdocuments, dir, executor);
+			}
+			else{
+				
+				// if there are no urls in the current folder
+				fileReaderAndConverter(folderPathAfterdocuments, dir);
+			}
 		
-		
-		
-	}	catch(Exception ex){
-		logger.error(ex.getMessage());
-	}
-		return null;
+			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
+			enterLinkView.addObject("message",messageObject );
+			
+			logger.info(enterLinkView);
+			
+		}
+		catch(Exception universalException){
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage(universalException.getMessage());
+			enterLinkView.addObject("message",messageObject );
+	        logger.info("error occured" +universalException.getMessage());
+	        return enterLinkView;
+
+		}
+		return enterLinkView;
 }}
