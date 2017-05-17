@@ -36,9 +36,6 @@ import org.apache.xmlbeans.XmlException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -48,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
 	private static final int BUFFER_SIZE = 4096;
 
-	
+
 	final static Logger logger = Logger.getLogger(UserServiceImpl.class);
 
 	private String home = System.getProperty("user.home");
@@ -62,17 +59,17 @@ public class UserServiceImpl implements UserService {
 
 		String url="https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.read.all&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect";
 		String os = System.getProperty("os.name").toLowerCase();
-	try {
-		
-		
-		
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		final HttpGet httpRequest = new HttpGet( url );
+		try {
 
 
-		logger.info(httpRequest);
-		
-		HttpResponse response = httpClient.execute(httpRequest);
+
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			final HttpGet httpRequest = new HttpGet( url );
+
+
+			logger.info(httpRequest);
+
+			HttpResponse response = httpClient.execute(httpRequest);
 
 			Runtime rt = Runtime.getRuntime();
 			if(os.indexOf( "win" ) >= 0){
@@ -97,9 +94,9 @@ public class UserServiceImpl implements UserService {
 					cmd.append( (i==0  ? "" : " || " ) + browsers[i] +" \"" + url + "\" ");
 
 				rt.exec(new String[] { "sh", "-c", cmd.toString() });
-		
-	}
-	}catch(Exception ex){
+
+			}
+		}catch(Exception ex){
 			logger.error(" error occured"  + ex.getMessage());
 			ex.printStackTrace();
 		}
@@ -114,35 +111,124 @@ public class UserServiceImpl implements UserService {
 	public ModelAndView personalItemsDownloadAndConvert(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
 
 		ModelAndView enterLinkView = new ModelAndView();
-	try{
-		
-		SuccessMessageObject messageObject= new SuccessMessageObject();
-		
-		String access_token= tokenAndPath.getToken();
-		
-		String tokenheader = "Bearer"+" "+access_token;
-		
-		
-		
-		String fileUrl=tokenAndPath.getPath();
-		
-		if(fileUrl.contains("?")){
-			int indexOfQueryParam = fileUrl.indexOf("?");
-			
-			 fileUrl= fileUrl.substring(0, indexOfQueryParam);
-		}
-		
-		
-		// path for the single file
-		if((fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".PDF")) || (fileUrl.endsWith(".DOCS"))|| (fileUrl.endsWith(".docs")) 
-				|| (fileUrl.endsWith(".DOCX"))|| (fileUrl.endsWith(".docx")) || (fileUrl.endsWith(".pptx")) || (fileUrl.endsWith(".PPTX")) || 
-				(fileUrl.endsWith(".PPT")) || (fileUrl.endsWith(".ppt"))
-				|| (fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".xlsx")) || (fileUrl.endsWith(".XLSX")) || (fileUrl.endsWith(".xls")) ||
-				(fileUrl.endsWith(".XLS"))){
-			
-			
-		
-			
+		try{
+
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+
+			String access_token= tokenAndPath.getToken();
+
+			String tokenheader = "Bearer"+" "+access_token;
+
+
+
+			String fileUrl=tokenAndPath.getPath();
+
+			if(fileUrl.contains("?")){
+				int indexOfQueryParam = fileUrl.indexOf("?");
+
+				fileUrl= fileUrl.substring(0, indexOfQueryParam);
+			}
+
+
+			// path for the single file
+			if((fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".PDF")) || (fileUrl.endsWith(".DOCS"))|| (fileUrl.endsWith(".docs")) 
+					|| (fileUrl.endsWith(".DOCX"))|| (fileUrl.endsWith(".docx")) || (fileUrl.endsWith(".pptx")) || (fileUrl.endsWith(".PPTX")) || 
+					(fileUrl.endsWith(".PPT")) || (fileUrl.endsWith(".ppt"))
+					|| (fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".xlsx")) || (fileUrl.endsWith(".XLSX")) || (fileUrl.endsWith(".xls")) ||
+					(fileUrl.endsWith(".XLS"))){
+
+
+
+
+				String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
+
+				// gets the start index after the documents path
+				int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+
+
+				String file = base_path.substring(indexAfterDocuments);
+
+				String oneDriveFileUrl ="https://graph.microsoft.com/beta/me/drive/root:/"+file;
+
+				int local_directory =file.lastIndexOf("/")+1;
+
+				String local_folder = file.substring(local_directory);
+
+				String MakeLocalDirectory =local_folder.replace("%20", " ");
+
+
+				int indexToRemoveExntension = MakeLocalDirectory.lastIndexOf(".");
+
+				String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
+
+
+				File dir = new File(saveDir+"\\Downloads\\"+extensionLessDirectory);
+
+				dir.mkdirs();
+
+				SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(oneDriveFileUrl, tokenheader);
+
+				String responseFromAdaptor= responseAndMessage.getResponse();
+
+				System.out.println("responseFromAdaptor   "+responseFromAdaptor);
+
+				Gson gson = new Gson();
+
+
+
+				if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+
+					ModelAndView errorView = new ModelAndView();
+
+					Error error = gson.fromJson(responseFromAdaptor, Error.class);
+
+
+					messageObject.setMessage(error.getError().getCode());
+
+					errorView.addObject("message", messageObject);
+
+					errorView.setViewName("display");
+
+					return errorView;
+				}
+
+				MetaDataForFolder outerMetaData =gson.fromJson(responseFromAdaptor, MetaDataForFolder.class);
+
+
+
+
+
+				String Url = outerMetaData.getMicrosoft_graph_downloadUrl();
+
+
+
+
+
+				UserServiceImpl.downloadFile(Url,dir.getPath());
+
+
+
+				fileReaderAndConverter(file, dir);
+
+				messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
+				enterLinkView.addObject("message",messageObject );
+				enterLinkView.setViewName("display");
+
+				return enterLinkView;
+
+
+			}
+
+			enterLinkView.setViewName("display");
+
+
+
+
+
+
+			String commonUrl ="https://graph.microsoft.com/beta/me/";
+
+			//	String base_path = "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
 			String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
 
 			// gets the start index after the documents path
@@ -150,208 +236,120 @@ public class UserServiceImpl implements UserService {
 
 
 			String file = base_path.substring(indexAfterDocuments);
-			
-		String oneDriveFileUrl ="https://graph.microsoft.com/beta/me/drive/root:/"+file;
-		
-		int local_directory =file.lastIndexOf("/")+1;
-		
-		String local_folder = file.substring(local_directory);
-		
-		String MakeLocalDirectory =local_folder.replace("%20", " ");
-		
-		
-		int indexToRemoveExntension = MakeLocalDirectory.lastIndexOf(".");
-		
-		String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
 
-		
-		File dir = new File(saveDir+"\\Downloads\\"+extensionLessDirectory);
-	
-	    dir.mkdirs();
-		
-		SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(oneDriveFileUrl, tokenheader);
-		
-		String responseFromAdaptor= responseAndMessage.getResponse();
-		
-		System.out.println("responseFromAdaptor   "+responseFromAdaptor);
-		
-           Gson gson = new Gson();
-           ObjectMapper mapper = new ObjectMapper();
-			 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		
-		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-		
-			
-			Error obj = mapper.readValue(responseFromAdaptor, Error.class);
-			
-		    messageObject.setMessage(obj.getError().getCode());
-			
-			
-			
-			ModelAndView errorView = new ModelAndView();
-			errorView.addObject("message", messageObject);
-			errorView.setViewName("display");
-			return errorView;
-		}
-		
-		MetaDataForFolder outerMetaData =gson.fromJson(responseFromAdaptor, MetaDataForFolder.class);
-		
-		
-		
-	
-		
-				String Url = outerMetaData.getMicrosoft_graph_downloadUrl();
-				
-		
-		
+			int local_directory =file.lastIndexOf("/")+1;
+			String local_folder = file.substring(local_directory);
 
-		
-		UserServiceImpl.downloadFile(Url,dir.getPath());
-		
-		
-		
-		fileReaderAndConverter(file, dir);
-		
-		messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
-		enterLinkView.addObject("message",messageObject );
-		enterLinkView.setViewName("display");
-		
-		return enterLinkView;
-		
-			
-		}
-		
-		enterLinkView.setViewName("display");
-		
+			String child =":/children";
 
-		
+			String MakeLocalDirectory =local_folder.replace("%20", " ");
 
 
+			String completeurl= commonUrl+"drive/root:/"+file+child;
 
-		String commonUrl ="https://graph.microsoft.com/beta/me/";
-
-		//	String base_path = "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
-		String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
-
-		// gets the start index after the documents path
-		int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+			System.out.println("saiiii"+""+file);
 
 
-		String file = base_path.substring(indexAfterDocuments);
-
-		int local_directory =file.lastIndexOf("/")+1;
-		String local_folder = file.substring(local_directory);
-
-		String child =":/children";
-
-		String MakeLocalDirectory =local_folder.replace("%20", " ");
+			//making a directory
+			File dir = new File(saveDir+"\\Downloads\\"+MakeLocalDirectory);
+			dir.mkdirs();
 
 
-		String completeurl= commonUrl+"drive/root:/"+file+child;
-
-		System.out.println("saiiii"+""+file);
-
-
-		//making a directory
-		File dir = new File(saveDir+"\\Downloads\\"+MakeLocalDirectory);
-		dir.mkdirs();
-
-
-		System.out.println(completeurl);
+			System.out.println(completeurl);
 
 
 
 
 
-		//make a get call to one drive api
-		
-		
-		
+			//make a get call to one drive api
 
 
-		SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(completeurl, tokenheader);
-		
-		
-		String responseFromAdaptor= responseAndMessage.getResponse();
-		
-		final Gson gson = new Gson();
-		
-		 ObjectMapper mapper = new ObjectMapper();
-		 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		
-		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-            Error obj = mapper.readValue(responseFromAdaptor, Error.class);
-			
-		    messageObject.setMessage(obj.getError().getCode());
-			
-			
-			
-			ModelAndView errorView = new ModelAndView();
-			errorView.addObject("message", messageObject);
-			errorView.setViewName("display");
-			return errorView;
-		}
-		
-		OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
 
-		System.out.println("json form ");
-		System.out.println(outerMetaData);
-		List<String> downloadUrls = new ArrayList<String>();
-		for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
 
-			if(metaDataForFolder.getFolder()!=null &&
-					(Integer.parseInt(metaDataForFolder.getFolder().getChildCount())>=1)){
-				readingInnerFolders(tokenheader, commonUrl,base_path, child, file, dir, gson, metaDataForFolder);
-			}else{
-				String Url = metaDataForFolder.getMicrosoft_graph_downloadUrl();
-				downloadUrls.add(Url);
+
+			SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(completeurl, tokenheader);
+
+
+			String responseFromAdaptor= responseAndMessage.getResponse();
+
+			 Gson gson = new Gson();
+
+
+			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+				Error error = gson.fromJson(responseFromAdaptor, Error.class);
+
+
+				messageObject.setMessage(error.getError().getCode());
+
+
+
+
+				ModelAndView errorView = new ModelAndView();
+				errorView.addObject("message", messageObject);
+				errorView.setViewName("display");
+				return errorView;
 			}
+
+			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
+
+			System.out.println("json form ");
+			System.out.println(outerMetaData);
+			List<String> downloadUrls = new ArrayList<String>();
+			for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
+
+				if(metaDataForFolder.getFolder()!=null &&
+						(Integer.parseInt(metaDataForFolder.getFolder().getChildCount())>=1)){
+					readingInnerFolders(tokenheader, commonUrl,base_path, child, file, dir, gson, metaDataForFolder);
+				}else{
+					String Url = metaDataForFolder.getMicrosoft_graph_downloadUrl();
+					downloadUrls.add(Url);
+				}
+			}
+
+
+			System.out.println(downloadUrls);
+
+
+
+
+			// create the size of the thread pool dynamically
+			if(!downloadUrls.isEmpty()){
+				ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
+				final long startTime = System.currentTimeMillis();
+				for (String downloadUrl:downloadUrls){
+
+					System.out.println("saveDir------>"+saveDir);			
+					// multithreading framework for downloading files
+					Runnable download= new MultiDownLoadExecutor(downloadUrl, dir.getPath());
+					executor.execute(download);
+				}
+				executor.shutdown();
+
+				final long endTime = System.currentTimeMillis();
+				System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
+
+				concurrentConverter(file, dir, executor);
+			}
+			else{
+
+				// for empty urls just convert the files
+				fileReaderAndConverter(file, dir);
+			}
+			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+"   And Converted to text format");
+			enterLinkView.addObject("message",messageObject );
+
+			logger.info(enterLinkView);
+
 		}
+		catch(Exception universalException){
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage(universalException.getMessage());
+			enterLinkView.addObject("message",messageObject );
+			logger.info("error occured" +universalException.getMessage());
+			return enterLinkView;
 
-
-		System.out.println(downloadUrls);
-
-	
-
-
-		// create the size of the thread pool dynamically
-		if(!downloadUrls.isEmpty()){
-		ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
-		final long startTime = System.currentTimeMillis();
-		for (String downloadUrl:downloadUrls){
-
-			System.out.println("saveDir------>"+saveDir);			
-			// multithreading framework for downloading files
-			Runnable download= new MultiDownLoadExecutor(downloadUrl, dir.getPath());
-			executor.execute(download);
 		}
-		executor.shutdown();
-		
-		final long endTime = System.currentTimeMillis();
-		System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
-
-		concurrentConverter(file, dir, executor);
-		}
-		else{
-			
-			// for empty urls just convert the files
-			fileReaderAndConverter(file, dir);
-		}
-		messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
-		enterLinkView.addObject("message",messageObject );
-		
-		logger.info(enterLinkView);
-		
-	}
-	catch(Exception universalException){
-		SuccessMessageObject messageObject= new SuccessMessageObject();
-		messageObject.setMessage(universalException.getMessage());
-		enterLinkView.addObject("message",messageObject );
-        logger.info("error occured" +universalException.getMessage());
-        return enterLinkView;
-
-	}
-	return enterLinkView;	
+		return enterLinkView;	
 
 	}
 
@@ -368,7 +366,7 @@ public class UserServiceImpl implements UserService {
 				.map(Path::toFile)
 				.collect(Collectors.toList());
 		logger.info("no of files read to convert into text format   "+ filesInFolder.size());
-		
+
 		logger.info("files read from the directory "+filesInFolder);
 		ExecutorService converterExecutor = Executors.newFixedThreadPool(1);
 		for(File officefile:filesInFolder){
@@ -422,20 +420,20 @@ public class UserServiceImpl implements UserService {
 		SuccessMessageObject messageObject= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
 
 		String responseFromAdaptor1=messageObject.getResponse();
-		ObjectMapper mapper = new ObjectMapper();
-		 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		
+
 		if(messageObject.getMessage()!=null && messageObject.getMessage().equalsIgnoreCase("error")){
-           Error obj = mapper.readValue(responseFromAdaptor1, Error.class);
-			
-		    messageObject.setMessage(obj.getError().getCode());
-			
-			
-			
+			Error error = gson.fromJson(responseFromAdaptor1, Error.class);
+
+
+			messageObject.setMessage(error.getError().getCode());
+
+
+
 			ModelAndView errorView = new ModelAndView();
 			errorView.addObject("message", messageObject);
 		}
-		
+
 		OuterMetaData outerMetaData1 =gson.fromJson(responseFromAdaptor1, OuterMetaData.class);
 
 		List<String> downloadUrls1 = new ArrayList<String>();
@@ -451,31 +449,31 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		if (!downloadUrls1.isEmpty()){
-		ExecutorService executor1 = Executors.newFixedThreadPool(downloadUrls1.size());
-		for (String downloadUrl1:downloadUrls1){
+			ExecutorService executor1 = Executors.newFixedThreadPool(downloadUrls1.size());
+			for (String downloadUrl1:downloadUrls1){
 
 
-			// multithreading framework for downloading files
-			Runnable download1= new MultiDownLoadExecutor(downloadUrl1, innerdir1.getPath());
-			executor1.execute(download1);
+				// multithreading framework for downloading files
+				Runnable download1= new MultiDownLoadExecutor(downloadUrl1, innerdir1.getPath());
+				executor1.execute(download1);
+			}
+			executor1.shutdown();
+			//		if(  (executor1.awaitTermination(20, TimeUnit.SECONDS) )){
+			//			List<File> filesInFolder = Files.walk(Paths.get(innerdir1.getPath()))
+			//					.filter(Files::isRegularFile)
+			//					.map(Path::toFile)
+			//					.collect(Collectors.toList());
+			//			ExecutorService converterExecutor = Executors.newFixedThreadPool(filesInFolder.size());
+			//			for(File officefile:filesInFolder){
+			//
+			//				//parallel conversion of all files 
+			//				Runnable converter= new ParallelConverter(officefile, insideFoldername);
+			//				converterExecutor.execute(converter);
+			//
+			//			}
+			//			converterExecutor.shutdown();
+			//		}
 		}
-		executor1.shutdown();
-		//		if(  (executor1.awaitTermination(20, TimeUnit.SECONDS) )){
-		//			List<File> filesInFolder = Files.walk(Paths.get(innerdir1.getPath()))
-		//					.filter(Files::isRegularFile)
-		//					.map(Path::toFile)
-		//					.collect(Collectors.toList());
-		//			ExecutorService converterExecutor = Executors.newFixedThreadPool(filesInFolder.size());
-		//			for(File officefile:filesInFolder){
-		//
-		//				//parallel conversion of all files 
-		//				Runnable converter= new ParallelConverter(officefile, insideFoldername);
-		//				converterExecutor.execute(converter);
-		//
-		//			}
-		//			converterExecutor.shutdown();
-		//		}
-	}
 	}
 
 	public static void downloadFile(String fileURL, String saveDir)
@@ -533,75 +531,75 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public  static SuccessMessageObject doGet( final String url,String tokenheader ) throws ClientProtocolException, IOException{
-		
-		
-		
+
+
+
 		try{
-		SuccessMessageObject messageObject = new SuccessMessageObject();
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-		final HttpGet httpRequest = new HttpGet( url );
+			SuccessMessageObject messageObject = new SuccessMessageObject();
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			final HttpGet httpRequest = new HttpGet( url );
 
-		httpRequest.addHeader("Content-Type", "text/plain");
-		httpRequest.addHeader("Authorization", tokenheader);
+			httpRequest.addHeader("Content-Type", "text/plain");
+			httpRequest.addHeader("Authorization", tokenheader);
 
-		logger.info(httpRequest.getMethod());
-		
-		HttpResponse response = httpClient.execute(httpRequest);
-		
-		logger.info(response);
+			logger.info(httpRequest.getMethod());
 
-		if ( null == response )	{
-			logger.error( "Http Request failed, httpResponse is null." );
-			messageObject.setMessage("error");
-			logger.error("HTTP response is null");
-			releaseHttpConnection( httpRequest );
-			
-		}
+			HttpResponse response = httpClient.execute(httpRequest);
 
-		if ( null == response.getStatusLine() )	{
-			logger.error( "Http Request failed, httpResponse is null." );
-			messageObject.setMessage("error");
-			logger.error("HTTP getStatusLine response is null");
-			releaseHttpConnection( httpRequest );
-			
-		}
-		
-		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
-		
-		final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) response.getEntity();
-		final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
-		EntityUtils.consume( entity );
-		logger.info(httpRequest.toString());
-		System.out.println(responseString);
-		httpClient.getConnectionManager().shutdown();
-		
-		
-		messageObject.setResponse(responseString);
-		messageObject.setMessage("success");	
-		
-		if ( httpStatusCode != null && !httpStatusCode.equals( HttpStatus.SC_OK ) ){
-			messageObject.setMessage("error");	
-		}
-		
-		
-		return messageObject;
+			logger.info(response);
+
+			if ( null == response )	{
+				logger.error( "Http Request failed, httpResponse is null." );
+				messageObject.setMessage("error");
+				logger.error("HTTP response is null");
+				releaseHttpConnection( httpRequest );
+
+			}
+
+			if ( null == response.getStatusLine() )	{
+				logger.error( "Http Request failed, httpResponse is null." );
+				messageObject.setMessage("error");
+				logger.error("HTTP getStatusLine response is null");
+				releaseHttpConnection( httpRequest );
+
+			}
+
+			final Integer httpStatusCode = response.getStatusLine().getStatusCode();
+
+			final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) response.getEntity();
+			final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
+			EntityUtils.consume( entity );
+			logger.info(httpRequest.toString());
+			System.out.println(responseString);
+			httpClient.getConnectionManager().shutdown();
+
+
+			messageObject.setResponse(responseString);
+			messageObject.setMessage("success");	
+
+			if ( httpStatusCode != null && !httpStatusCode.equals( HttpStatus.SC_OK ) ){
+				messageObject.setMessage("error");	
+			}
+
+
+			return messageObject;
 		}
 		catch(Exception ex){
-			
+
 			SuccessMessageObject messageObject= new SuccessMessageObject();
 			messageObject.setMessage("error");
-			
-	        logger.info("error occured" +ex.getMessage());
-	        return messageObject;
+
+			logger.info("error occured" +ex.getMessage());
+			return messageObject;
 		}
-	    
-		
-		
-		
-		
+
+
+
+
+
 	}
-	
-	
+
+
 	private static void releaseHttpConnection( final HttpRequestBase httpRequest ) {
 		if ( null != httpRequest ) {
 			httpRequest.abort();;
@@ -616,16 +614,16 @@ public class UserServiceImpl implements UserService {
 	public ModelAndView listSharedUsers(TokenAndPath tokenAndPath)
 			throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException,
 			OpenXML4JException, XmlException {
-		
-		
-		
+
+
+
 		ModelAndView enterLinkView = new ModelAndView();
 		try{
-			
+
 			SuccessMessageObject messageObject= new SuccessMessageObject();
-			
-			
-			
+
+
+
 			enterLinkView.setViewName("test1");
 			String access_token= tokenAndPath.getToken();
 
@@ -635,78 +633,79 @@ public class UserServiceImpl implements UserService {
 
 			String urlForSharedWithMeItems ="https://graph.microsoft.com/beta/me/drive/sharedWithMe";
 
-		
+
 
 
 
 
 			//make a get call to one drive api
-			
-			
-			
-            SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(urlForSharedWithMeItems, tokenheader);
-			
-			
+
+
+
+			SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(urlForSharedWithMeItems, tokenheader);
+
+
 			String responseFromAdaptor= responseAndMessage.getResponse();
-			
-			 Gson gson = new Gson();
-			 ObjectMapper mapper = new ObjectMapper();
-			 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-			
-			
+
+			Gson gson = new Gson();
+
+
+
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-			
+
 				ModelAndView errorView = new ModelAndView();
-				
-				Error obj = mapper.readValue(responseFromAdaptor, Error.class);
-				
-			    messageObject.setMessage(obj.getError().getCode());
-			
+
+				Error error = gson.fromJson(responseFromAdaptor, Error.class);
+
+
+
+				messageObject.setMessage(error.getError().getCode());
+
 				errorView.addObject("message", messageObject);
 				errorView.setViewName("display");
 				return errorView;
 			}
-			
+
 			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
-			
+
 			HashMap<String, User> namesOfAllSharingUsers = new HashMap<String, User>();
-			
+
 			Set<String> displayNames = new HashSet<String>();
-			
+
 			HashMap<String, String> namesAndDriveId = new HashMap<String, String>();
-			
+
 			for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
-				
-			String driveId =metaDataForFolder.getRemoteItem().getParentReference().getDriveId();				
-				
-			
-				
+
+				String driveId =metaDataForFolder.getRemoteItem().getParentReference().getDriveId();				
+
+
+
 				namesOfAllSharingUsers=	metaDataForFolder.getCreatedBy();
-			//String driveId=	"b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+				//String driveId=	"b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
 				Collection<User> users=namesOfAllSharingUsers.values();
 				Iterator<User> itr = 	users.iterator();
 				while(itr.hasNext()) {
 					User currentDriveUser = (User) itr.next();
 					displayNames.add(currentDriveUser.getDisplayName());
 					namesAndDriveId.put(currentDriveUser.getDisplayName(), driveId);
-		}
-						}
+				}
+			}
 
 			enterLinkView.setViewName("shareduserslist");
 			enterLinkView.addObject("sharedusers", namesAndDriveId);
 			System.out.println("json form ");
 			System.out.println(outerMetaData);
 
-		
-		
-	}catch(Exception universalException){
-		logger.error(universalException.getStackTrace());
-		SuccessMessageObject messageObject= new SuccessMessageObject();
-		messageObject.setMessage(universalException.getMessage());
-		enterLinkView.addObject("message",messageObject );
-        logger.error("error occured" +universalException.getCause());
-        return enterLinkView;
-	}
+
+
+		}catch(Exception universalException){
+			logger.error(universalException.getStackTrace());
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage(universalException.getMessage());
+			enterLinkView.addObject("message",messageObject );
+			logger.error("error occured" +universalException.getCause());
+			return enterLinkView;
+		}
 		return enterLinkView;
 	}
 
@@ -714,23 +713,23 @@ public class UserServiceImpl implements UserService {
 	public ModelAndView sharedItemsDownloadAndConvert(TokenAndPath tokenAndPath)
 			throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException,
 			OpenXML4JException, XmlException {
-		
+
 		ModelAndView enterLinkView = new ModelAndView();
 		try{
-			
+
 			SuccessMessageObject messageObject= new SuccessMessageObject();
-			
-		
-			
+
+
+
 			enterLinkView.setViewName("display");
-			
-			
+
+
 			String access_token= tokenAndPath.getToken();
 
 			String tokenheader = "Bearer"+" "+access_token;
 
 
-			
+
 			String driveId = tokenAndPath.getDriveId();
 
 			String commonUrl ="https://graph.microsoft.com/beta";
@@ -745,10 +744,10 @@ public class UserServiceImpl implements UserService {
 			String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
 
 			int local_directory =folderPathAfterdocuments.lastIndexOf("/")+1;
-			
-			
+
+
 			String local_folder = folderPathAfterdocuments.substring(local_directory);
-			
+
 
 			String childAppender =":/children";
 
@@ -772,34 +771,33 @@ public class UserServiceImpl implements UserService {
 
 
 			//make a get call to one drive api
-			
-			
+
+
 			SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(completeurl, tokenheader);
-			
-			
+
+
 			String responseFromAdaptor= responseAndMessage.getResponse();
-			
+
 			logger.info(responseFromAdaptor);
-			
+
 			final Gson gson = new Gson();
-			
-			ObjectMapper mapper = new ObjectMapper();
-			 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-			
-			
+
+		
+
+
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-			
+
 				ModelAndView errorView = new ModelAndView();
-				
-				Error obj = mapper.readValue(responseFromAdaptor, Error.class);
-				
-			    messageObject.setMessage(obj.getError().getCode());
-			
+
+				Error error = gson.fromJson(responseFromAdaptor, Error.class);
+
+				messageObject.setMessage(error.getError().getCode());
+
 				errorView.addObject("message", messageObject);
 				errorView.setViewName("display");
 				return errorView;
 			}
-			
+
 			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
 
 			System.out.println("json form ");
@@ -815,44 +813,44 @@ public class UserServiceImpl implements UserService {
 					downloadUrls.add(Url);
 				}
 			}
-		
+
 			// create the size of the thread pool dynamically
 			if(!downloadUrls.isEmpty()){
-			ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
-			final long startTime = System.currentTimeMillis();
-			for (String downloadUrl:downloadUrls){
+				ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
+				final long startTime = System.currentTimeMillis();
+				for (String downloadUrl:downloadUrls){
 
-				System.out.println("saveDir------>"+saveDir);			
-				// multithreading framework for downloading files
-				Runnable download= new MultiDownLoadExecutor(downloadUrl, dir.getPath());
-				executor.execute(download);
-			}
-			executor.shutdown();
-			
-			final long endTime = System.currentTimeMillis();
-			System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
+					System.out.println("saveDir------>"+saveDir);			
+					// multithreading framework for downloading files
+					Runnable download= new MultiDownLoadExecutor(downloadUrl, dir.getPath());
+					executor.execute(download);
+				}
+				executor.shutdown();
 
-			concurrentConverter(folderPathAfterdocuments, dir, executor);
+				final long endTime = System.currentTimeMillis();
+				System.out.println("Time taken to get Response in millis:" + ( endTime - startTime ));
+
+				concurrentConverter(folderPathAfterdocuments, dir, executor);
 			}
 			else{
-				
+
 				// if there are no urls in the current folder
 				fileReaderAndConverter(folderPathAfterdocuments, dir);
 			}
-		
-			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
+
+			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+"  And Converted to text format");
 			enterLinkView.addObject("message",messageObject );
-			
+
 			logger.info(enterLinkView);
-			
+
 		}
 		catch(Exception universalException){
 			SuccessMessageObject messageObject= new SuccessMessageObject();
 			messageObject.setMessage(universalException.getMessage());
 			enterLinkView.addObject("message",messageObject );
-	        logger.info("error occured" +universalException.getMessage());
-	        return enterLinkView;
+			logger.info("error occured" +universalException.getMessage());
+			return enterLinkView;
 
 		}
 		return enterLinkView;
-}}
+	}}

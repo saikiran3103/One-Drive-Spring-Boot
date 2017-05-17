@@ -75,7 +75,7 @@ public class ErrorInner implements Serializable{
 	 */
 	@Override
 	public String toString() {
-		return "ErrorObject [code=" + code + ", message=" + message + "]";
+		return "ErrorInner [code=" + code + ", message=" + message + ", innerError=" + innerError + "]";
 	}
 
 }
