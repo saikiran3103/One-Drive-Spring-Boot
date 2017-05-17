@@ -355,17 +355,26 @@ public class ParallelConverter implements Runnable {
 
 
 				PdfReader pdfReader;
-				try {
-					pdfReader = new PdfReader(officefile.getAbsolutePath());
-
+				try(FileInputStream inputStream = new FileInputStream(new File(officefile.getAbsolutePath()))) {
+					
+					
+					
+					
+				
+					pdfReader = new PdfReader(inputStream);
+					
+					inputStream.close();
 					PdfReaderContentParser parser = new PdfReaderContentParser(pdfReader);
 
 					TextExtractionStrategy strategy;
+					
+					
 
 					for (int i = 1; i <= pdfReader.getNumberOfPages(); i++) {
 						strategy = parser.processContent(i, new SimpleTextExtractionStrategy());
 						System.out.println("strategy.getResultantText()"+strategy.getResultantText());
 						String content=(strategy.getResultantText());
+						pdfReader.close();
 						
 						if(content.isEmpty()){
 							logger.error("content for the file-->"+officefile.getAbsolutePath()+"_ is empty");
@@ -395,11 +404,17 @@ public class ParallelConverter implements Runnable {
 
 
 
-				} catch (IOException e1) {
+				}
+				
+				
+				catch(IOException e1) {
 					logger.error(" error occured while extracting and converting   "+officefile.getAbsolutePath()+"     " + e1.getMessage());
-
+                 Thread.currentThread().interrupt();
+                
 					e1.printStackTrace();
-				}		
+					 return;
+				}	
+				
 
 			}
 		}

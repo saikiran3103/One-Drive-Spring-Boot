@@ -11,6 +11,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 @Service
@@ -52,10 +54,16 @@ public static void processAndDownloadSubFolders(String tokenheader, String commo
 	
 	String responseFromAdaptor1= responseAndMessage.getResponse();
 	
+	ObjectMapper mapper = new ObjectMapper();
+	 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+	
 	if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-		Error errorMessage = gson.fromJson(responseFromAdaptor1, Error.class);
+		Error obj = mapper.readValue(responseFromAdaptor1, Error.class);
+		
+	    SuccessMessageObject messageObject= new SuccessMessageObject();
+		messageObject.setMessage(obj.getError().getCode());
 		ModelAndView errorView = new ModelAndView();
-		errorView.addObject("error", errorMessage);
+		errorView.addObject("message", messageObject);
 		
 	}
 

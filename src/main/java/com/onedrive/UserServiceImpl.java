@@ -36,6 +36,9 @@ import org.apache.xmlbeans.XmlException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -170,12 +173,23 @@ public class UserServiceImpl implements UserService {
 		
 		String responseFromAdaptor= responseAndMessage.getResponse();
 		
-          final Gson gson = new Gson();
+		System.out.println("responseFromAdaptor   "+responseFromAdaptor);
+		
+           Gson gson = new Gson();
+           ObjectMapper mapper = new ObjectMapper();
+			 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		
 		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-			Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+		
+			
+			Error obj = mapper.readValue(responseFromAdaptor, Error.class);
+			
+		    messageObject.setMessage(obj.getError().getCode());
+			
+			
+			
 			ModelAndView errorView = new ModelAndView();
-			errorView.addObject("error", errorMessage);
+			errorView.addObject("message", messageObject);
 			errorView.setViewName("display");
 			return errorView;
 		}
@@ -262,10 +276,18 @@ public class UserServiceImpl implements UserService {
 		
 		final Gson gson = new Gson();
 		
+		 ObjectMapper mapper = new ObjectMapper();
+		 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		
 		if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-			Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+            Error obj = mapper.readValue(responseFromAdaptor, Error.class);
+			
+		    messageObject.setMessage(obj.getError().getCode());
+			
+			
+			
 			ModelAndView errorView = new ModelAndView();
-			errorView.addObject("error", errorMessage);
+			errorView.addObject("message", messageObject);
 			errorView.setViewName("display");
 			return errorView;
 		}
@@ -345,9 +367,10 @@ public class UserServiceImpl implements UserService {
 				.filter(Files::isRegularFile)
 				.map(Path::toFile)
 				.collect(Collectors.toList());
+		logger.info("no of files read to convert into text format   "+ filesInFolder.size());
 		
 		logger.info("files read from the directory "+filesInFolder);
-		ExecutorService converterExecutor = Executors.newFixedThreadPool(filesInFolder.size());
+		ExecutorService converterExecutor = Executors.newFixedThreadPool(10);
 		for(File officefile:filesInFolder){
 
 			//parallel conversion of all files 
@@ -399,12 +422,18 @@ public class UserServiceImpl implements UserService {
 		SuccessMessageObject messageObject= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
 
 		String responseFromAdaptor1=messageObject.getResponse();
+		ObjectMapper mapper = new ObjectMapper();
+		 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		
 		if(messageObject.getMessage()!=null && messageObject.getMessage().equalsIgnoreCase("error")){
-			Error errorMessage = gson.fromJson(responseFromAdaptor1, Error.class);
-			ModelAndView errorView = new ModelAndView();
-			errorView.addObject("error", errorMessage);
+           Error obj = mapper.readValue(responseFromAdaptor1, Error.class);
 			
+		    messageObject.setMessage(obj.getError().getCode());
+			
+			
+			
+			ModelAndView errorView = new ModelAndView();
+			errorView.addObject("message", messageObject);
 		}
 		
 		OuterMetaData outerMetaData1 =gson.fromJson(responseFromAdaptor1, OuterMetaData.class);
@@ -620,14 +649,20 @@ public class UserServiceImpl implements UserService {
 			
 			String responseFromAdaptor= responseAndMessage.getResponse();
 			
-			final Gson gson = new Gson();
-			
+			 Gson gson = new Gson();
+			 ObjectMapper mapper = new ObjectMapper();
+			 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 			
 			
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-				Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+			
 				ModelAndView errorView = new ModelAndView();
-				errorView.addObject("error", errorMessage);
+				
+				Error obj = mapper.readValue(responseFromAdaptor, Error.class);
+				
+			    messageObject.setMessage(obj.getError().getCode());
+			
+				errorView.addObject("message", messageObject);
 				errorView.setViewName("display");
 				return errorView;
 			}
@@ -748,7 +783,7 @@ public class UserServiceImpl implements UserService {
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
 				Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
 				ModelAndView errorView = new ModelAndView();
-				errorView.addObject("error", errorMessage);
+				errorView.addObject("message", errorMessage);
 				errorView.setViewName("display");
 				return errorView;
 			}

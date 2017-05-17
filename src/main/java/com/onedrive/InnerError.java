@@ -3,6 +3,7 @@ package com.onedrive;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class InnerError implements Serializable {
@@ -12,12 +13,12 @@ public class InnerError implements Serializable {
 	 */
 	private static final long serialVersionUID = -5485989958953816443L;
 
-
+    @Expose
 	@SerializedName("request-id")
 	private String request_id;
 	 
-	 
-	 private Date date;
+    @Expose
+	 private String date;
 	
 	/**
 	 * @return the request_id
@@ -36,14 +37,14 @@ public class InnerError implements Serializable {
 	/**
 	 * @return the date
 	 */
-	public Date getDate() {
+	public String getDate() {
 		return date;
 	}
 
 	/**
 	 * @param date the date to set
 	 */
-	public void setDate(Date date) {
+	public void setDate(String date) {
 		this.date = date;
 	}
 

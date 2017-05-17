@@ -20,23 +20,22 @@
 
 
 <script>
-function myFunction(message,error) {
+function myFunction() {
 
+	
 
-   if(message.message){
+   if(typeof ${message} != undefined){
 	   return ${message.message};
  }
-   else if(error){
-	   var textmessage = ${error.code}+" " +${error.message};
-	   return textmessage;
-   }
+  
    else{
 	   return "check the logs for the error returned ";
    }
 }
-var messageobtained =${message};
-var errorObtained= ${error};
-document.getElementById("mymessage").innerHTML = myFunction(messageobtained, errorObtained); 
+ 
+
+
+document.getElementById("mymessage").innerHTML = myFunction(); 
 </script>
 </body>
 </html>
