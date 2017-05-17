@@ -1,4 +1,5 @@
 com\onedrive\MakeDirectoryUtility.class
+com\onedrive\PDFConverter.class
 com\onedrive\SpringBootWebApplication.class
 com\onedrive\SuccessMessageObject.class
 com\onedrive\InnerError.class
@@ -12,7 +13,9 @@ com\onedrive\HelloController.class
 com\onedrive\ErrorInner.class
 com\onedrive\UserService.class
 com\onedrive\HttpRestAdaptor.class
+com\onedrive\DriveUser.class
 com\onedrive\ParentReference.class
+com\onedrive\RemoteItem.class
 com\onedrive\User.class
 com\onedrive\Folder.class
 com\onedrive\TokenAndPath.class
@@ -20,4 +23,3 @@ com\onedrive\OuterMetaDataForSharedItems.class
 com\onedrive\ParallelConverter.class
 com\onedrive\WelcomeController.class
 com\onedrive\InnerFoldersReaderUtility.class
-com\onedrive\ParentRefernceForSharedItem.class

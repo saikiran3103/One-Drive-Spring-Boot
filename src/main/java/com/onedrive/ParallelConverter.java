@@ -12,12 +12,10 @@ import org.apache.log4j.Logger;
 import org.apache.poi.POIXMLProperties.CoreProperties;
 import org.apache.poi.hslf.HSLFSlideShow;
 import org.apache.poi.hslf.model.TextRun;
-import org.apache.poi.hslf.record.Slide;
 import org.apache.poi.hslf.usermodel.SlideShow;
 import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.poifs.crypt.dsig.facets.OOXMLSignatureFacet;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
@@ -27,10 +25,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
-import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
+import com.snowtide.PDF;
+import com.snowtide.pdf.Document;
+import com.snowtide.pdf.OutputTarget;
 
 public class ParallelConverter implements Runnable {
 
@@ -54,6 +51,10 @@ public class ParallelConverter implements Runnable {
 	}
 
 	private static void officeFilesConverter(File officefile, String originalFolderName) {
+		
+		
+		
+		try{
 		officefile.getAbsolutePath();
 		System.out.println("Reading file "+officefile.getName());
 		officefile.getName();
@@ -354,57 +355,78 @@ public class ParallelConverter implements Runnable {
 
 
 
-				PdfReader pdfReader;
-				try(FileInputStream inputStream = new FileInputStream(new File(officefile.getAbsolutePath()))) {
+//				PdfReader pdfReader;
+//				try(FileInputStream inputStream = new FileInputStream(new File(officefile.getAbsolutePath()))) {
+//					
+//					
+//					
+//					
+//				
+//					pdfReader = new PdfReader(inputStream);
+//					
+//					inputStream.close();
+//					PdfReaderContentParser parser = new PdfReaderContentParser(pdfReader);
+//
+//					TextExtractionStrategy strategy;
+//					
+//					
+//
+//					for (int i = 1; i <= pdfReader.getNumberOfPages(); i++) {
+//						strategy = parser.processContent(i, new SimpleTextExtractionStrategy());
+//						System.out.println("strategy.getResultantText()"+strategy.getResultantText());
+//						String content=(strategy.getResultantText());
+//						pdfReader.close();
+//						
+//						if(content.isEmpty()){
+//							logger.error("content for the file-->"+officefile.getAbsolutePath()+"_ is empty");
+//						}
+//						try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME,true))) {
+//
+//
+//
+//							bw.write(content);
+//
+//							// no need to close it.
+//							//bw.close();
+//
+//							System.out.println("Done");
+//
+//						} catch (IOException e) {
+//							logger.error(" error occured while extracting and converting   "+officefile.getAbsolutePath()+"     " + e.getMessage());
+//
+//							e.printStackTrace();
+//
+//						}
+//						pdfReader.close();
+
 					
-					
-					
-					
-				
-					pdfReader = new PdfReader(inputStream);
-					
-					inputStream.close();
-					PdfReaderContentParser parser = new PdfReaderContentParser(pdfReader);
 
-					TextExtractionStrategy strategy;
-					
-					
-
-					for (int i = 1; i <= pdfReader.getNumberOfPages(); i++) {
-						strategy = parser.processContent(i, new SimpleTextExtractionStrategy());
-						System.out.println("strategy.getResultantText()"+strategy.getResultantText());
-						String content=(strategy.getResultantText());
-						pdfReader.close();
-						
-						if(content.isEmpty()){
-							logger.error("content for the file-->"+officefile.getAbsolutePath()+"_ is empty");
-						}
-						try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME,true))) {
-
-
-
-							bw.write(content);
-
-							// no need to close it.
-							//bw.close();
-
-							System.out.println("Done");
-
-						} catch (IOException e) {
-							logger.error(" error occured while extracting and converting   "+officefile.getAbsolutePath()+"     " + e.getMessage());
-
-							e.printStackTrace();
-
-						}
-						pdfReader.close();
-
-					}
-
-
-
-
-
+				//	pdfReader.close();
+			 Document pdf = PDF.open(officefile);
+			    StringBuilder text = new StringBuilder(1024);
+			    pdf.pipe(new OutputTarget(text));
+			    try {
+					pdf.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+			    System.out.println(text);
+			    
+			    try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME,true))) {
+
+
+
+					bw.write(text.toString());
+
+					// no need to close it.
+					//bw.close();
+
+					System.out.println("Done");
+
+				} 
+
+				
 				
 				
 				catch(IOException e1) {
@@ -421,5 +443,11 @@ public class ParallelConverter implements Runnable {
 	
 
 	
+	} catch(Exception common){
+		logger.error(" error occured while extracting and converting   "+officefile.getAbsolutePath()+"     " + common.getMessage());
+		common.printStackTrace();
 	}
-}
+	finally{
+		
+	}
+}}

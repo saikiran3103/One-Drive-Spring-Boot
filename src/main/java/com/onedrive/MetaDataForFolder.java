@@ -73,6 +73,8 @@ public class MetaDataForFolder implements Serializable{
 	    
 	    
 	    private Folder folder;
+	    
+	    private RemoteItem remoteItem;
 
 	    /**
 	     * A Url that can be used to download this file's content.
@@ -270,6 +272,14 @@ public class MetaDataForFolder implements Serializable{
 			this.microsoft_graph_downloadUrl = microsoft_graph_downloadUrl;
 		}
 
+		public RemoteItem getRemoteItem() {
+			return remoteItem;
+		}
+
+		public void setRemoteItem(RemoteItem remoteItem) {
+			this.remoteItem = remoteItem;
+		}
+
 		/* (non-Javadoc)
 		 * @see java.lang.Object#toString()
 		 */
@@ -279,7 +289,8 @@ public class MetaDataForFolder implements Serializable{
 					+ createdDateTime + ", lastModifiedBy=" + lastModifiedBy + ", lastModifiedDateTime="
 					+ lastModifiedDateTime + ", cTag=" + cTag + ", eTag=" + eTag + ", size=" + size + ", webUrl="
 					+ webUrl + ", parentReference=" + parentReference + ", rawJson=" + rawJson + ", folder=" + folder
-					+ ", microsoft_graph_downloadUrl=" + microsoft_graph_downloadUrl + "]";
+					+ ", remoteItem=" + remoteItem + ", microsoft_graph_downloadUrl=" + microsoft_graph_downloadUrl
+					+ "]";
 		}
 
 	   

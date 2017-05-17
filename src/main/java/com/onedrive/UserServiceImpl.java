@@ -370,7 +370,7 @@ public class UserServiceImpl implements UserService {
 		logger.info("no of files read to convert into text format   "+ filesInFolder.size());
 		
 		logger.info("files read from the directory "+filesInFolder);
-		ExecutorService converterExecutor = Executors.newFixedThreadPool(10);
+		ExecutorService converterExecutor = Executors.newFixedThreadPool(1);
 		for(File officefile:filesInFolder){
 
 			//parallel conversion of all files 
@@ -667,7 +667,7 @@ public class UserServiceImpl implements UserService {
 				return errorView;
 			}
 			
-			OuterMetaDataForSharedItems outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaDataForSharedItems.class);
+			OuterMetaData outerMetaData =gson.fromJson(responseFromAdaptor, OuterMetaData.class);
 			
 			HashMap<String, User> namesOfAllSharingUsers = new HashMap<String, User>();
 			
@@ -675,11 +675,14 @@ public class UserServiceImpl implements UserService {
 			
 			HashMap<String, String> namesAndDriveId = new HashMap<String, String>();
 			
-			for (MetaDataForSharedItem metaDataForFolder:outerMetaData.getValue()){
+			for (MetaDataForFolder metaDataForFolder:outerMetaData.getValue()){
 				
-			//	String driveId =metaDataForFolder.getParentReference().getDriveId();
+			String driveId =metaDataForFolder.getRemoteItem().getParentReference().getDriveId();				
+				
+			
+				
 				namesOfAllSharingUsers=	metaDataForFolder.getCreatedBy();
-			String driveId=	"b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+			//String driveId=	"b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
 				Collection<User> users=namesOfAllSharingUsers.values();
 				Iterator<User> itr = 	users.iterator();
 				while(itr.hasNext()) {
@@ -780,10 +783,19 @@ public class UserServiceImpl implements UserService {
 			
 			final Gson gson = new Gson();
 			
+			ObjectMapper mapper = new ObjectMapper();
+			 mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+			
+			
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
-				Error errorMessage = gson.fromJson(responseFromAdaptor, Error.class);
+			
 				ModelAndView errorView = new ModelAndView();
-				errorView.addObject("message", errorMessage);
+				
+				Error obj = mapper.readValue(responseFromAdaptor, Error.class);
+				
+			    messageObject.setMessage(obj.getError().getCode());
+			
+				errorView.addObject("message", messageObject);
 				errorView.setViewName("display");
 				return errorView;
 			}
