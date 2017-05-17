@@ -34,7 +34,21 @@
 
  <input id="driveId" type="hidden" name="driveId" value="Test3">
   
- <input type="button" id="downloadbutton2" Value="Confirm the User shared"  onclick="submitUser();">
+ <input type="button" id="downloadbutton2" Value="Confirm the User shared"  onclick="submitUser();"
+ 
+	 style="
+ 
+    
+    
+ margin-top: 22px;
+ color: rgb(255, 193, 7);
+ background: rgba(76, 175, 80, 0.97);
+ box-shadow: 0 0 20px black;
+ text-shadow: 0 0 13px black;
+ 
+"
+
+ >
 </form>
 <br>
 

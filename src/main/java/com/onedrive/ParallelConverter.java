@@ -58,8 +58,7 @@ public class ParallelConverter implements Runnable {
 		System.out.println("Reading file "+officefile.getName());
 		officefile.getName();
 		logger.info("converting the file _"+officefile.getAbsolutePath());
-		System.out.println("officefile.getAbsoluteFile().getParentFile()"+officefile.getAbsoluteFile().getParentFile());
-		System.out.println("officefile.getAbsolutePath();"+officefile.getAbsolutePath());
+		
 		
 
 		
@@ -71,7 +70,7 @@ public class ParallelConverter implements Runnable {
 		
 		textNaming1.concat(".txt");
 
-		System.out.println("testing sai"+officefile.getParent()+"officefile.getPath()");
+		
 		
 		 File f = new File(officefile.getPath());
 		    String path = f.getParent();
@@ -92,7 +91,7 @@ public class ParallelConverter implements Runnable {
 		{
 			if (officefile.getName().endsWith(".docx") || officefile.getName().endsWith(".DOCX")) {
 				//	FileInputStream in=new FileInputStream(officefile);
-
+				
 				String content;
 				try (XWPFWordExtractor xWPFWordExtractor=new XWPFWordExtractor(new XWPFDocument(new FileInputStream(officefile)))){
 					

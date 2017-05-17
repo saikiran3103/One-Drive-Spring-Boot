@@ -345,6 +345,8 @@ public class UserServiceImpl implements UserService {
 				.filter(Files::isRegularFile)
 				.map(Path::toFile)
 				.collect(Collectors.toList());
+		
+		logger.info("files read from the directory "+filesInFolder);
 		ExecutorService converterExecutor = Executors.newFixedThreadPool(filesInFolder.size());
 		for(File officefile:filesInFolder){
 
@@ -354,6 +356,12 @@ public class UserServiceImpl implements UserService {
 
 		}
 		converterExecutor.shutdown();
+		try {
+			converterExecutor.awaitTermination(180,TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void readingInnerFolders(String tokenheader, String commonUrl, String base_path,String child, String file, File dir,
