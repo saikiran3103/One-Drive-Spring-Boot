@@ -17,7 +17,7 @@
     background-color: azure;
     color: red;
     font-size: larger;
-     padding-top: 80px;">
+     padding-top: 60px;">
 
 <article>
   <header>
@@ -34,12 +34,12 @@
 </article>
 <div>
 <p style="text-align:center
-    font-size: 22pt;
+    font-size: x-large;
     font-style: italic;
     font-feature-settings: initial;
-    color: #f3185d;
+    color: rgba(24, 69, 243, 0.82);
     width: 1545px;
-    margin-top: 85px;
+    margin-top: 60px;
     font-weight: bold;"
 
 > Personal Items </p></div>
@@ -50,13 +50,13 @@
 <p style="
  
  
-    font-size: 22pt;
+    font-size: 18pt;
     font-style: italic;
     font-feature-settings: initial;
     color: #f3185d;
     width: 1545px;
-    margin-top: 85px;
-    ">Enter the shared  One drive URL :</p>
+    margin-top: 60px;
+    ">Enter the One drive Link for Your Personal Items :</p>
     
      <input id="text1" type="text" >
 <!-- <input id="param1" type="hidden" name="param1" value="Test"> -->
@@ -77,26 +77,26 @@ box-shadow: 0 0 20px black;
 <div style="text-align:center"> 
 
 <p style="text-align:center
-    font-size: 22pt;
+    font-size: x-large;
     font-style: italic;
     font-feature-settings: initial;
-    color: #f3185d;
+    color: rgba(24, 69, 243, 0.82);
     width: 1545px;
      font-weight: bold;
-    margin-top: 85px;"
+    margin-top: 60px;"
 
 > Shared Items </p>
 <form name="myForm2" action="shareditems" method="POST">
 <p style="
  
  
-    font-size: 22pt;
+    font-size: 18pt;
     font-style: italic;
     font-feature-settings: initial;
     color: #f3185d;
     width: 1545px;
-    margin-top: 85px;
-    ">Enter the shared  One drive URL for shared items :</p>
+    margin-top: 60px;
+    ">Enter the  One drive Link for Shared Items :</p>
     
      <input id="textshared" type="text" >
 <!-- <input id="param1" type="hidden" name="param1" value="Test"> -->

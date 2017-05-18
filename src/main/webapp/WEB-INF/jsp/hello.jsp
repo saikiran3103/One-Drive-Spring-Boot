@@ -10,7 +10,10 @@
 <link href="${bootstrapCss}" rel="stylesheet" />
 <link href="${coreCss}" rel="stylesheet" />
 </head>
-<body>
+<body  style="
+    text-align: center;
+    font-style: italic;
+    background-color: azure;">
 
 <article>
   <header>

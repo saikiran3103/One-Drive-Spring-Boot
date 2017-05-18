@@ -746,8 +746,106 @@ public class UserServiceImpl implements UserService {
 
 
 			String driveId = tokenAndPath.getDriveId();
-
+			
+			String fileUrl=tokenAndPath.getPath();
+			
 			String commonUrl ="https://graph.microsoft.com/beta";
+
+			if(fileUrl.contains("?")){
+				int indexOfQueryParam = fileUrl.indexOf("?");
+
+				fileUrl= fileUrl.substring(0, indexOfQueryParam);
+			}
+			
+			if((fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".PDF")) || (fileUrl.endsWith(".DOCS"))|| (fileUrl.endsWith(".docs")) 
+					|| (fileUrl.endsWith(".DOCX"))|| (fileUrl.endsWith(".docx")) || (fileUrl.endsWith(".pptx")) || (fileUrl.endsWith(".PPTX")) || 
+					(fileUrl.endsWith(".PPT")) || (fileUrl.endsWith(".ppt"))
+					|| (fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".xlsx")) || (fileUrl.endsWith(".XLSX")) || (fileUrl.endsWith(".xls")) ||
+					(fileUrl.endsWith(".XLS"))){
+				
+				
+				
+				
+
+				String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
+
+				// gets the start index after the documents path
+				int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+
+
+				String file = base_path.substring(indexAfterDocuments);
+
+				String oneDriveFileUrl =commonUrl+"/drives/"+driveId+"/root:/"+file;
+
+				int local_directory =file.lastIndexOf("/")+1;
+
+				String local_folder = file.substring(local_directory);
+
+				String MakeLocalDirectory =local_folder.replace("%20", " ");
+
+
+				int indexToRemoveExntension = MakeLocalDirectory.lastIndexOf(".");
+
+				String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
+
+
+				File dir = new File(saveDir+"\\Downloads\\"+extensionLessDirectory);
+
+				dir.mkdirs();
+
+				SuccessMessageObject responseAndMessage= UserServiceImpl.doGet(oneDriveFileUrl, tokenheader);
+
+				String responseFromAdaptor= responseAndMessage.getResponse();
+
+				System.out.println("responseFromAdaptor   "+responseFromAdaptor);
+
+				Gson gson = new Gson();
+
+
+
+				if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
+
+					ModelAndView errorView = new ModelAndView();
+
+					Error error = gson.fromJson(responseFromAdaptor, Error.class);
+
+
+					messageObject.setMessage(error.getError().getCode());
+
+					errorView.addObject("message", messageObject);
+
+					errorView.setViewName("display");
+
+					return errorView;
+				}
+
+				MetaDataForFolder outerMetaData =gson.fromJson(responseFromAdaptor, MetaDataForFolder.class);
+
+
+
+
+
+				String Url = outerMetaData.getMicrosoft_graph_downloadUrl();
+
+
+
+
+
+				UserServiceImpl.downloadFile(Url,dir.getPath());
+
+
+
+				fileReaderAndConverter(file, dir);
+
+				messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+" <br> And Converted to text format");
+				enterLinkView.addObject("message",messageObject );
+				enterLinkView.setViewName("display");
+
+				return enterLinkView;
+				
+			}
+
+			
 
 			//	String base_path = "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
 			String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
