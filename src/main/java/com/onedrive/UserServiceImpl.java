@@ -219,6 +219,9 @@ public class UserServiceImpl implements UserService {
 
 			}
 
+			
+			
+			// folder execution starts from here
 			enterLinkView.setViewName("display");
 
 
@@ -369,10 +372,12 @@ public class UserServiceImpl implements UserService {
 
 		logger.info("files read from the directory "+filesInFolder);
 		ExecutorService converterExecutor = Executors.newFixedThreadPool(1);
+	
 		for(File officefile:filesInFolder){
 
-			//parallel conversion of all files 
-			Runnable converter= new ParallelConverter(officefile, file);
+//			//parallel conversion of all files 
+		//	converterExecutor.execute(converter);
+			Runnable converter = new ParallelConverter(officefile, file);
 			converterExecutor.execute(converter);
 
 		}
@@ -458,6 +463,13 @@ public class UserServiceImpl implements UserService {
 				executor1.execute(download1);
 			}
 			executor1.shutdown();
+			
+			try {
+				executor1.awaitTermination(900, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			//		if(  (executor1.awaitTermination(20, TimeUnit.SECONDS) )){
 			//			List<File> filesInFolder = Files.walk(Paths.get(innerdir1.getPath()))
 			//					.filter(Files::isRegularFile)
@@ -681,6 +693,9 @@ public class UserServiceImpl implements UserService {
 
 
 				namesOfAllSharingUsers=	metaDataForFolder.getCreatedBy();
+				if(namesOfAllSharingUsers.isEmpty()){
+					namesOfAllSharingUsers = metaDataForFolder.getLastModifiedBy();
+				}
 				//String driveId=	"b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
 				Collection<User> users=namesOfAllSharingUsers.values();
 				Iterator<User> itr = 	users.iterator();

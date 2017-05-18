@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.client.ClientProtocolException;
 import org.springframework.stereotype.Service;
@@ -92,6 +93,14 @@ public static void processAndDownloadSubFolders(String tokenheader, String commo
 		executor1.execute(download1);
 	}
 	executor1.shutdown();
+	
+	try {
+		executor1.awaitTermination(900, TimeUnit.SECONDS);
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
 
 }
 }

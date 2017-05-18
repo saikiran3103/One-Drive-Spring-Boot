@@ -5,6 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="true" %>
 <title>shared users</title>
 </head>
 <body  style="
@@ -14,13 +15,18 @@
     color: red;
     font-size: larger;
      padding-top: 119px;">
-
+     
+    <p>
+This is the URL you provided, check the user name in the url and confirm the user<br>
+</p>
+"<c:out value="${sessionScope.sharedItemUrl}"/>"
 
 <form name="downloadSharedfilesForm" action="downloadsharedfiles" method="POST">
 
 <table>
 
  <c:forEach items="${sharedusers}" var="user">
+ <br><br>
 <input type="radio" name="myRadio" value="${user.value}" id="myRadio"  >
 
 
@@ -45,7 +51,8 @@
  background: rgba(76, 175, 80, 0.97);
  box-shadow: 0 0 20px black;
  text-shadow: 0 0 13px black;
- 
+ font-size: 16px;
+  cursor: pointer;
 "
 
  >
