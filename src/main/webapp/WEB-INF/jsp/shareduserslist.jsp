@@ -3,9 +3,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+<style> img.animated-gif{
+  width: 180px;
+  height: auto;
+}</style>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page session="true" %>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <title>shared users</title>
 </head>
 <body  style="
@@ -15,15 +20,28 @@
     color: red;
     font-size: larger;
      padding-top: 119px;">
+   
      
-    <p>
+  <p id = "message"  style= "
+     color:#0029ff;
+     font-size:  x-large;"></p>   
+    <p id ="urlmessage" style= "
+     color:#0029ff;
+     font-size:  x-large;">
 This is the URL you provided, check the user name in the url and confirm the user<br>
 </p>
-"<c:out value="${sessionScope.sharedItemUrl}"/>"
+<p   id = "sharedItemUrl" style= "
+     color:#0029ff;
+     font-size:  x-large;"><c:out value="${sessionScope.sharedItemUrl}"/>"</p>
+     
+     <div id="searchingimageDiv" style="display:none">
+<center><img  class="animated-gif" id="searchingimage1" src="/Images/loading1.gif" alt="downloading and extracting text" /> </center></div>
 
 <form name="downloadSharedfilesForm" action="downloadsharedfiles" method="POST">
 
-<table>
+
+
+<table id ="mytable">
 
  <c:forEach items="${sharedusers}" var="user">
  <br><br>
@@ -35,7 +53,6 @@ This is the URL you provided, check the user name in the url and confirm the use
        shared user-->"${user.key}"
         </c:forEach>
     </table>
-
 
 
  <input id="driveId" type="hidden" name="driveId" value="Test3">
@@ -62,10 +79,23 @@ This is the URL you provided, check the user name in the url and confirm the use
 
 
 
-
-
 <script>
 function submitUser() {
+	
+	var oimageDiv=document.getElementById('searchingimageDiv') ;
+	//set display to inline if currently none, otherwise to none 
+	oimageDiv.style.display=(oimageDiv.style.display=='none')?'inline':'none' 
+	
+	$("#c").hide();
+	
+	
+	
+	document.getElementById("urlmessage").innerHTML ="";
+	
+	document.getElementById("sharedItemUrl").innerHTML ="";
+	   
+	
+	document.getElementById("message").innerHTML ="Please wait while we are downloading and Converting your shared files ...";
    
 	document.getElementById("driveId").value =document.querySelector('input[name="myRadio"]:checked').value;
 	

@@ -4,17 +4,25 @@
 <head>
    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     
-   
+  
    
 </head>
 <TITLE>Your Title Here</TITLE>
+
+
 </HEAD>
-<BODY  BGCOLOR="white">
+<BODY  style="
+    text-align: center;
+    font-style: italic;
+    background-color: azure;
+    color: red;
+    font-size: larger;
+     padding-top: 80px;">
 
 <article>
   <header>
    <div  style="text-align:center">  <h1 id= "headingmessage" style="
-    font-size: 34pt;
+    font-size: 26pt;
     font-family: serif;
     font-style: italic;
     font-feature-settings: initial;
@@ -24,8 +32,21 @@
   </header>
   
 </article>
+<div>
+<p style="text-align:center
+    font-size: 22pt;
+    font-style: italic;
+    font-feature-settings: initial;
+    color: #f3185d;
+    width: 1545px;
+    margin-top: 85px;
+    font-weight: bold;"
+
+> Personal Items </p></div>
 <div style="text-align:center"> 
 <form name="myForm" action="path1" method="POST">
+
+
 <p style="
  
  
@@ -40,12 +61,31 @@
      <input id="text1" type="text" >
 <!-- <input id="param1" type="hidden" name="param1" value="Test"> -->
 <input id="param2" type="hidden" name="param2" value="Test2">
-<input type="button" id="downloadbutton" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" Value="Download And Convert" onclick="submitform();">
+<input type="button" id="downloadbutton" 
+style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;
+box-shadow: 0 0 20px black;
+ text-shadow: 0 0 13px black;
+ 
+  cursor: pointer;
+
+"
+ Value="Download And Convert" onclick="submitform();">
 </form>
 
 </div>
 
 <div style="text-align:center"> 
+
+<p style="text-align:center
+    font-size: 22pt;
+    font-style: italic;
+    font-feature-settings: initial;
+    color: #f3185d;
+    width: 1545px;
+     font-weight: bold;
+    margin-top: 85px;"
+
+> Shared Items </p>
 <form name="myForm2" action="shareditems" method="POST">
 <p style="
  
@@ -61,20 +101,27 @@
      <input id="textshared" type="text" >
 <!-- <input id="param1" type="hidden" name="param1" value="Test"> -->
 <input id="param3" type="hidden" name="param3" value="Test3">
-<input type="button" id="downloadbutton2" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;" Value="Download And Convert" onclick="submitform2();">
-</form>
+<input type="button" id="downloadbutton2" style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;
+box-shadow: 0 0 20px black;
+ text-shadow: 0 0 13px black;
+ 
+  cursor: pointer;
 
+padding:3px;" Value="Download And Convert" onclick="submitform2();">
+</form>
+ 
 
 </div>
 	<div id="loader"></div>
 <div id="searchingimageDiv" style="display:none">
-<center><img id="searchingimage1" src="http://www.dokolica.rs/wp-content/uploads/2016/02/Cento-Lodigiani-animated-GIFs-12.gif" alt="downloading and extracting text" /> </center></div>
+<center><img id="searchingimage1" src="/Images/Loading_icon.gif" alt="downloading and extracting text" /> </center></div>
 
 <script type= text/javascript>
 
 function submitform(){
-	
+	$("#downloadbutton2").hide();
 	$("#downloadbutton").hide();
+	$("#textshared").hide();
 	$("p").hide();
 	$("#text1").hide();
 	document.getElementById('headingmessage').innerHTML ='Your files are being downloaded and processed !';
@@ -117,9 +164,11 @@ function submitform(){
 
 function submitform2(){
 	
+	$("#downloadbutton").hide();
 	$("#downloadbutton2").hide();
 	$("p").hide();
 	$("#textshared").hide();
+	$("#text1").hide();
 	document.getElementById('headingmessage').innerHTML ='Your files are being downloaded and processed !';
 	    
 	var oimageDiv=document.getElementById('searchingimageDiv') ;
@@ -162,27 +211,7 @@ function submitform2(){
 </script>
 
 </BODY>
-<style>
- .loader {
-  border: 16px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 16px solid #3498db;
-  width: 120px;
-  height: 120px;
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
-}
 
-@-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-</style>
 
 
 

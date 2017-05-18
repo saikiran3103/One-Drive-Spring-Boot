@@ -7,7 +7,13 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <title>downloaded </title>
 </head>
-<body>
+<body style="
+    text-align: center;
+    font-style: italic;
+    background-color: azure;
+    color: red;
+    font-size: larger;
+     padding-top: 119px;">
 
     
    <div style="text-align:center">  <h1 id= "mymessage" style="

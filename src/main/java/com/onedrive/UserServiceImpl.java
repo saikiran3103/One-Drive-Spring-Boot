@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
 
 				fileReaderAndConverter(file, dir);
 
-				messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString());
+				messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+" <br> And Converted to text format");
 				enterLinkView.addObject("message",messageObject );
 				enterLinkView.setViewName("display");
 
@@ -338,7 +338,7 @@ public class UserServiceImpl implements UserService {
 				// for empty urls just convert the files
 				fileReaderAndConverter(file, dir);
 			}
-			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+"   And Converted to text format");
+			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+" <br>  And Converted to text format");
 			enterLinkView.addObject("message",messageObject );
 
 			logger.info(enterLinkView);
@@ -853,7 +853,7 @@ public class UserServiceImpl implements UserService {
 				fileReaderAndConverter(folderPathAfterdocuments, dir);
 			}
 
-			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+"  And Converted to text format");
+			messageObject.setMessage(" Your files are downloaded to "+dir.getPath().toString()+" <br> And Converted to text format");
 			enterLinkView.addObject("message",messageObject );
 
 			logger.info(enterLinkView);
