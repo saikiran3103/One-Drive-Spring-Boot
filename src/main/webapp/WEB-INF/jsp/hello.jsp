@@ -13,7 +13,12 @@
 <body  style="
     text-align: center;
     font-style: italic;
-    background-color: azure;">
+    background-color: azure;
+    background: url(https://media.giphy.com/media/GCQzDWYV9BE4w/giphy.gif) no-repeat center center fixed; 
+  webkit-background-size: cover;
+  moz-background-size: cover;
+  o-background-size: cover;
+  background-size: cover;">
 
 <article>
   <header>
@@ -41,13 +46,14 @@
     font-family: monospace;
     font-style: inherit;
     font-feature-settings: initial;
-    color: #0b83e9;
+    color: #3f3430;
     width: 1545px;
     margin-top: 85px;
     ">Use the button below to connect to Office 365.</p>
     </div>
 		<div style="text-align:center" >
-		<button style="font-size:13pt;color:white;background-color:green;border: 13px solid #336600;padding:3px;"  onclick="window.location.href='https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.readwrite&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect';">Connect to Office 365</button>
+		<button style="font-size:13pt;color:white;background-color:#800047;border: 13px solid #336600;padding:3px;
+		cursor: pointer;"  onclick="window.location.href='https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.readwrite&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect';">Connect to Office 365</button>
 </div>
 <!--  	
  <form action="token" method="GET">
