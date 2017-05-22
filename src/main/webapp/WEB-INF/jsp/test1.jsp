@@ -15,9 +15,11 @@
     text-align: center;
     font-style: italic;
     background-color: azure;
-    color: red;
-    font-size: larger;
-     padding-top: 60px;">
+    background: url(http://zdnet2.cbsistatic.com/hub/i/2015/07/27/d1902653-2953-448b-817b-a25e7a0c9d68/92f9a40bf4c0cd4fd004c367e6119b27/businessman-sits-in-cloud.gif) no-repeat center center fixed; 
+  webkit-background-size: cover;
+  moz-background-size: cover;
+  o-background-size: cover;
+  background-size: cover;">
 
 <article>
   <header>

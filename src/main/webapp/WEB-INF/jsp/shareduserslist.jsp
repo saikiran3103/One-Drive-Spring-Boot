@@ -19,7 +19,16 @@
     background-color: azure;
     color: red;
     font-size: larger;
-     padding-top: 119px;">
+     padding-top: 119px;
+     
+      background: url(http://brandonfryedesign.com/projects/weather-api/icons/cloudy1.gif) no-repeat center center fixed; 
+  webkit-background-size: cover;
+  moz-background-size: cover;
+  o-background-size: cover;
+  background-size: cover;">
+     
+     
+     
    
      
   <p id = "message"  style= "

@@ -34,7 +34,7 @@
   </header>
   
 </article>
- 
+ <img src="${imgSrc}">
  
   <hr>
  
@@ -65,6 +65,7 @@ style="font-size:13pt;color:white;background-color:green;border: 13px solid #336
 				</div>
 			
  </div>
+ <spring:url value="/resources/static/images/loading1.gif" var="imgSrc" />
 <spring:url value="/resources/core/css/hello.js" var="coreJs" />
 <spring:url value="/resources/core/css/bootstrap.min.js" var="bootstrapJs" />
  

@@ -11,16 +11,18 @@
     text-align: center;
     font-style: italic;
     background-color: azure;
-    color: red;
-    font-size: larger;
-     padding-top: 119px;">
+    background: url(https://media.giphy.com/media/GCQzDWYV9BE4w/giphy.gif) no-repeat center center fixed; 
+  webkit-background-size: cover;
+  moz-background-size: cover;
+  o-background-size: cover;
+  background-size: cover;">
 
     
    <div style="text-align:center">  <h1 id= "mymessage" style="
     font-size: 26pt;
     font-family: serif;
     font-style: italic;
-    font-feature-settings: initial;
+  
     color: rgba(169, 66, 66, 0.98);">${message.message}</h1>
      </div>
 
