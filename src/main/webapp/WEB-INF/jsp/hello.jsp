@@ -53,7 +53,7 @@
     </div>
 		<div style="text-align:center" >
 		<button style="font-size:13pt;color:white;background-color:#800047;border: 13px solid #336600;padding:3px;
-		cursor: pointer;"  onclick="window.location.href='https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.readwrite&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect';">Connect to Office 365</button>
+		cursor: pointer;"  onclick="window.location.href='https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=sites.readwrite.all&files.readwrite,&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect';">Connect to Office 365</button>
 </div>
 <!--  	
  <form action="token" method="GET">

@@ -15,7 +15,7 @@
     text-align: center;
     font-style: italic;
     background-color: azure;
-    background: url(http://zdnet2.cbsistatic.com/hub/i/2015/07/27/d1902653-2953-448b-817b-a25e7a0c9d68/92f9a40bf4c0cd4fd004c367e6119b27/businessman-sits-in-cloud.gif) no-repeat center center fixed; 
+    background: url(https://www.jpl.nasa.gov/images/kepler/20170522/trappist1h20170522-home.gif) no-repeat center center fixed; 
   webkit-background-size: cover;
   moz-background-size: cover;
   o-background-size: cover;
@@ -55,7 +55,7 @@
     font-size: 18pt;
     font-style: italic;
     font-feature-settings: initial;
-    color: #f3185d;
+    color: #ffeb3b;
     width: 1545px;
     margin-top: 60px;
     ">Enter the One drive Link for Your Personal Items :</p>
@@ -95,7 +95,7 @@ box-shadow: 0 0 20px black;
     font-size: 18pt;
     font-style: italic;
     font-feature-settings: initial;
-    color: #f3185d;
+    color: #ffeb3b;
     width: 1545px;
     margin-top: 60px;
     ">Enter the  One drive Link for Shared Items :</p>
