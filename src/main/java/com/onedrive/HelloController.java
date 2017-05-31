@@ -1,10 +1,14 @@
 package com.onedrive;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import javax.print.DocFlavor.BYTE_ARRAY;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -189,5 +193,58 @@ public class HelloController {
 			return "test1";
 			//return "displayPath";
 		}
+		
+		
+		@RequestMapping(value = "onedrive/upload", method = RequestMethod.GET)
+		public ModelAndView goToUploadJsp(HttpServletRequest request) {
+			ModelAndView modelAndView = new ModelAndView();
+			
+			modelAndView.setViewName("uploadfile");
+			return modelAndView;
+
+		}
+		
+		//method to upload files to one drive
+				@RequestMapping(method = RequestMethod.POST, value="onedrive/uploadfiles")
+			    public ModelAndView uploadDocumentsToOneDrive(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, 
+			    OpenXML4JException, XmlException, ServletException {
+					HttpSession session = request.getSession();
+				//	 String driveId = request.getParameter("driveId");
+					
+					
+					 String driveId = "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+					 
+					
+					 String sharedItemUrl = 	(String)session.getAttribute("sharedItemUrl");
+					 
+				    logger.info("Getting the files for the drive id  "+driveId );
+				    
+					System.out.println(session.getAttribute("token"));
+					
+					TokenAndPath tokenAndPath=new TokenAndPath();
+					
+					tokenAndPath.setToken((String)session.getAttribute("token"));
+					
+					tokenAndPath.setDriveId(driveId);
+					
+					final Part filePart = request.getPart("file");
+					
+			        String path=request.getParameter("path");
+			        
+			        tokenAndPath.setPath(path);
+			        
+					logger.info(path+"path");
+					
+					logger.info(filePart.getSubmittedFileName().getBytes()+"filePart.getName()");
+					 FileInputStream fileContent=	(FileInputStream) filePart.getInputStream();
+				String nameOfFile=	filePart.getSubmittedFileName();
+					
+					byte[] fileArray= filePart.getSubmittedFileName().getBytes();
+					
+					logger.info("inside upload files");
+					return service.uploadDocumentsToOneDrive(tokenAndPath,fileContent,nameOfFile);
+					//return "displayPath";
+				}
+		
 		
 }

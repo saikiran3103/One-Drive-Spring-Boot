@@ -1,6 +1,7 @@
 package com.onedrive;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,11 +23,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -40,6 +47,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 
+/**
+ * @author sai.kiran.akkireddy
+ *
+ */
 @Controller
 public class UserServiceImpl implements UserService {
 
@@ -967,4 +978,98 @@ public class UserServiceImpl implements UserService {
 
 		}
 		return enterLinkView;
-	}}
+	}
+
+	@Override
+	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, FileInputStream fileInputStream, String nameOfFile) throws ClientProtocolException, IOException {
+		
+		String access_token= tokenAndPath.getToken();
+
+		String tokenheader = "Bearer"+" "+access_token;
+
+
+
+		String driveId = tokenAndPath.getDriveId();
+		
+		String fileUrl=tokenAndPath.getPath();
+		
+		String commonUrl ="https://graph.microsoft.com/v1.0/drives/";
+		
+		String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
+
+		// gets the start index after the documents path
+		int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+
+
+		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
+
+		int local_directory =folderPathAfterdocuments.lastIndexOf("/")+1;
+
+
+		String local_folder = folderPathAfterdocuments.substring(local_directory);
+
+
+		String contentStringAppender =":/content";
+		
+		
+		 String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/pdf.pdf"+contentStringAppender;
+		
+		
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+	
+		HttpPut httpPutRequest=new HttpPut(completeurl);
+		
+		httpPutRequest.addHeader("Content-Type", "application/x-www-form-urlencoded");
+		httpPutRequest.addHeader("Authorization", tokenheader);
+//		 FileEntity bin = new FileEntity(new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf"));
+//		 File inFile = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf");
+//		 FileInputStream fis = new FileInputStream("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf");
+		 MultipartEntity entity = new MultipartEntity();
+		 entity.addPart("file", new InputStreamBody(fileInputStream, nameOfFile));
+		 httpPutRequest.setEntity(entity);
+		HttpResponse response=	httpClient.execute(httpPutRequest);
+		
+	
+		logger.info(response);
+
+		SuccessMessageObject messageObject = null;
+		if ( null == response )	{
+			logger.error( "Http Request failed, httpResponse is null." );
+			messageObject.setMessage("error");
+			logger.error("HTTP response is null");
+			releaseHttpConnection( httpPutRequest );
+
+		}
+
+		if ( null == response.getStatusLine() )	{
+			logger.error( "Http Request failed, httpResponse is null." );
+			messageObject.setMessage("error");
+			logger.error("HTTP getStatusLine response is null");
+			releaseHttpConnection( httpPutRequest );
+
+		}
+
+		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
+
+		final org.apache.http.HttpEntity entity1 = (org.apache.http.HttpEntity) response.getEntity();
+		final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity1, "UTF-8" );
+		EntityUtils.consume( entity1 );
+		logger.info(httpPutRequest.toString());
+		System.out.println(responseString);
+		httpClient.getConnectionManager().shutdown();
+		
+		
+		return null;
+	}
+
+	/**
+     * Adds the label to a office document
+     *
+     * @param label and the file or file path
+     * @return the status success and model name
+     * @throws AppException  the app exception
+     * @throws TechException the tech exception
+     */
+	
+	
+	}
