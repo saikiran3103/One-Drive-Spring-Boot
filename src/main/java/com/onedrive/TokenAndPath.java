@@ -10,6 +10,8 @@ public class TokenAndPath {
 	private String driveId;
 	
 	private String userName;
+	
+	private int fileSize;
 
 	/**
 	 * @return the token
@@ -55,12 +57,20 @@ public class TokenAndPath {
 		this.driveId = driveId;
 	}
 
+	public int getFileSize() {
+		return fileSize;
+	}
+
+	public void setFileSize(int fileSize) {
+		this.fileSize = fileSize;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
 		return "TokenAndPath [token=" + token + ", path=" + path + ", driveId=" + driveId + ", userName=" + userName
-				+ "]";
+				+ ", fileSize=" + fileSize + "]";
 	}
 }

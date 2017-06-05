@@ -1,13 +1,21 @@
 package com.onedrive;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,18 +31,23 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.http.HttpEntity;
+import javax.mail.MessagingException;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hwpf.extractor.WordExtractor;
@@ -980,8 +993,23 @@ public class UserServiceImpl implements UserService {
 		return enterLinkView;
 	}
 
+	private static byte[][] convertToBytes(String[] strings) {
+	    byte[][] data = new byte[strings.length][];
+	    for (int i = 0; i < strings.length; i++) {
+	        String string = strings[i];
+	        data[i] = string.getBytes(Charset.defaultCharset()); // you can chose charset
+	    }
+	    return data;
+	}
+	
+	@SuppressWarnings("deprecation")
 	@Override
-	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, FileInputStream fileInputStream, String nameOfFile) throws ClientProtocolException, IOException {
+	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath,InputStream fileInputStream, String nameOfFile) throws ClientProtocolException, IOException, MessagingException {
+		
+		
+		
+
+		ModelAndView uploadFileView = new ModelAndView();
 		
 		String access_token= tokenAndPath.getToken();
 
@@ -1011,55 +1039,73 @@ public class UserServiceImpl implements UserService {
 
 		String contentStringAppender =":/content";
 		
+		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
+	//	String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
 		
-		 String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/pdf.pdf"+contentStringAppender;
+		 File file = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf");
+		 
+		 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
+		 
 		
+		 {
+
+
+			 byte [] bytearray = new byte [(int)file.length()];
+			 FileInputStream fin = new FileInputStream(file); 
+			 BufferedInputStream bin = new BufferedInputStream(fin); 
+			 bin.read(bytearray,0,bytearray.length);
+
+			
+		   
+
+
+		        URL uploadURL = new URL( completeurl.toString() );
+
+		      HttpURLConnection uploadConn = (HttpURLConnection)uploadURL.openConnection();
+		     
+
+		        uploadConn.setRequestMethod( "PUT" );
+		        uploadConn.setUseCaches(false);
+		        uploadConn.setDoOutput( true );         
+
+		        uploadConn.setRequestProperty("Authorization", "Bearer " + access_token);  // this is right
+		        uploadConn.setRequestProperty("Content-Type", "application/octet-stream");
+
+		        uploadConn.setChunkedStreamingMode( 0 );
+		     
+		        try (OutputStream os = uploadConn.getOutputStream()) {
+	             os.write(bytearray,0,bytearray.length);
+		            os.flush();
+		          
+	            
+		        }
+		     
+
+		        uploadConn.disconnect();
+
+		 }
 		
-		DefaultHttpClient httpClient = new DefaultHttpClient();
+		 
+		 int readbytes= 0;
+		 
+		
+				
+		 
+		
+
+		    // End of multipart/form-data.
 	
-		HttpPut httpPutRequest=new HttpPut(completeurl);
+
 		
-		httpPutRequest.addHeader("Content-Type", "application/x-www-form-urlencoded");
-		httpPutRequest.addHeader("Authorization", tokenheader);
-//		 FileEntity bin = new FileEntity(new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf"));
-//		 File inFile = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf");
-//		 FileInputStream fis = new FileInputStream("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf");
-		 MultipartEntity entity = new MultipartEntity();
-		 entity.addPart("file", new InputStreamBody(fileInputStream, nameOfFile));
-		 httpPutRequest.setEntity(entity);
-		HttpResponse response=	httpClient.execute(httpPutRequest);
 		
+		
+		
+		SuccessMessageObject messageObject= new SuccessMessageObject();
+		messageObject.setMessage("successfully uploaded to users shared drive");
+		uploadFileView.addObject("message",messageObject );
+		uploadFileView.setViewName("display");
 	
-		logger.info(response);
-
-		SuccessMessageObject messageObject = null;
-		if ( null == response )	{
-			logger.error( "Http Request failed, httpResponse is null." );
-			messageObject.setMessage("error");
-			logger.error("HTTP response is null");
-			releaseHttpConnection( httpPutRequest );
-
-		}
-
-		if ( null == response.getStatusLine() )	{
-			logger.error( "Http Request failed, httpResponse is null." );
-			messageObject.setMessage("error");
-			logger.error("HTTP getStatusLine response is null");
-			releaseHttpConnection( httpPutRequest );
-
-		}
-
-		final Integer httpStatusCode = response.getStatusLine().getStatusCode();
-
-		final org.apache.http.HttpEntity entity1 = (org.apache.http.HttpEntity) response.getEntity();
-		final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity1, "UTF-8" );
-		EntityUtils.consume( entity1 );
-		logger.info(httpPutRequest.toString());
-		System.out.println(responseString);
-		httpClient.getConnectionManager().shutdown();
-		
-		
-		return null;
+		return uploadFileView;
 	}
 
 	/**

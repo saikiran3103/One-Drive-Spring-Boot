@@ -2,7 +2,10 @@ package com.onedrive;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+
+import javax.mail.MessagingException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -24,7 +27,7 @@ public interface UserService {
 public	ModelAndView listSharedUsers(TokenAndPath tokenAndPath) throws IOException, IllegalStateException,
 			JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
 
-public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, FileInputStream fileInputStream, String nameOfFile) 
-		throws ClientProtocolException, IOException;
+public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
+		throws ClientProtocolException, IOException, MessagingException;
 
 }
