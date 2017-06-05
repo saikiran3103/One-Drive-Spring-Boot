@@ -1050,7 +1050,7 @@ public class UserServiceImpl implements UserService {
 		 {
 
 
-			 byte [] bytearray = new byte [(int)file.length()];
+			 byte [] bytearray = new byte [tokenAndPath.getFileSize()];
 			 FileInputStream fin = new FileInputStream(file); 
 			 BufferedInputStream bin = new BufferedInputStream(fileInputStream); 
 			 bin.read(bytearray,0,bytearray.length);
