@@ -1038,7 +1038,7 @@ public class UserServiceImpl implements UserService {
 		
 		 
 	//	 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
-		 
+		try 
 		
 		 {
 
@@ -1078,25 +1078,19 @@ public class UserServiceImpl implements UserService {
 
 		 }
 		
-		 
-		
-		 
-		
-				
-		 
-		
-
-		    // End of multipart/form-data.
-	
-
-		
-		
-		
+		catch(Exception ex){
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage("Error occured  Reason: "+ex.getMessage());
+			uploadFileView.addObject("message",messageObject );
+			uploadFileView.setViewName("display");
+		}
 		
 		SuccessMessageObject messageObject= new SuccessMessageObject();
-		messageObject.setMessage("successfully uploaded to users shared drive");
+		messageObject.setMessage("successfully uploaded "+nameOfFile+ " to users shared drive");
 		uploadFileView.addObject("message",messageObject );
 		uploadFileView.setViewName("display");
+		
+		
 	
 		return uploadFileView;
 	}
