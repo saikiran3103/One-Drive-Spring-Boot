@@ -993,16 +993,9 @@ public class UserServiceImpl implements UserService {
 		return enterLinkView;
 	}
 
-	private static byte[][] convertToBytes(String[] strings) {
-	    byte[][] data = new byte[strings.length][];
-	    for (int i = 0; i < strings.length; i++) {
-	        String string = strings[i];
-	        data[i] = string.getBytes(Charset.defaultCharset()); // you can chose charset
-	    }
-	    return data;
-	}
 	
-	@SuppressWarnings("deprecation")
+	
+	
 	@Override
 	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath,InputStream fileInputStream, String nameOfFile) throws ClientProtocolException, IOException, MessagingException {
 		
@@ -1013,13 +1006,13 @@ public class UserServiceImpl implements UserService {
 		
 		String access_token= tokenAndPath.getToken();
 
-		String tokenheader = "Bearer"+" "+access_token;
+		
 
 
 
 		String driveId = tokenAndPath.getDriveId();
 		
-		String fileUrl=tokenAndPath.getPath();
+		
 		
 		String commonUrl ="https://graph.microsoft.com/v1.0/drives/";
 		
@@ -1031,10 +1024,10 @@ public class UserServiceImpl implements UserService {
 
 		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
 
-		int local_directory =folderPathAfterdocuments.lastIndexOf("/")+1;
+	
 
 
-		String local_folder = folderPathAfterdocuments.substring(local_directory);
+		
 
 
 		String contentStringAppender =":/content";
@@ -1042,7 +1035,7 @@ public class UserServiceImpl implements UserService {
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
 		String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
 		
-		 File file = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/change.docx");
+		
 		 
 	//	 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
 		 
@@ -1051,7 +1044,7 @@ public class UserServiceImpl implements UserService {
 
 
 			 byte [] bytearray = new byte [tokenAndPath.getFileSize()];
-			 FileInputStream fin = new FileInputStream(file); 
+			
 			 BufferedInputStream bin = new BufferedInputStream(fileInputStream); 
 			 bin.read(bytearray,0,bytearray.length);
 
