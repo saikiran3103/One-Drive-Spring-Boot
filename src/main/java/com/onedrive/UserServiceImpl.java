@@ -1040,11 +1040,11 @@ public class UserServiceImpl implements UserService {
 		String contentStringAppender =":/content";
 		
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
-	//	String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
+		String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
 		
-		 File file = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf");
+		 File file = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/change.docx");
 		 
-		 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
+	//	 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
 		 
 		
 		 {
@@ -1052,7 +1052,7 @@ public class UserServiceImpl implements UserService {
 
 			 byte [] bytearray = new byte [(int)file.length()];
 			 FileInputStream fin = new FileInputStream(file); 
-			 BufferedInputStream bin = new BufferedInputStream(fin); 
+			 BufferedInputStream bin = new BufferedInputStream(fileInputStream); 
 			 bin.read(bytearray,0,bytearray.length);
 
 			
@@ -1086,7 +1086,7 @@ public class UserServiceImpl implements UserService {
 		 }
 		
 		 
-		 int readbytes= 0;
+		
 		 
 		
 				
