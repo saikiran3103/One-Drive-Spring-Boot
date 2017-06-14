@@ -30,4 +30,12 @@ public	ModelAndView listSharedUsers(TokenAndPath tokenAndPath) throws IOExceptio
 public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
 		throws ClientProtocolException, IOException, MessagingException;
 
+
+public ModelAndView uploadLargeDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
+		throws ClientProtocolException, IOException, MessagingException;
+
+
+public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
+		throws ClientProtocolException, IOException, MessagingException;
+
 }

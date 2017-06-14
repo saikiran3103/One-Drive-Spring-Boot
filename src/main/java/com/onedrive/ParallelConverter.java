@@ -96,6 +96,8 @@ public class ParallelConverter implements Runnable {
 				String content;
 				try (XWPFWordExtractor xWPFWordExtractor=new XWPFWordExtractor(new XWPFDocument(new FileInputStream(officefile)))){
 					
+				
+					
 					content=	xWPFWordExtractor.getText();
 				//	Content = (new XWPFWordExtractor(new XWPFDocument(new FileInputStream(officefile))).getText());
 					if(content.isEmpty()){

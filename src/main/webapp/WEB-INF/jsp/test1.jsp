@@ -4,7 +4,27 @@
 <head>
    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     
-  
+  <style>
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
    
 </head>
 <TITLE>Your Title Here</TITLE>
@@ -15,10 +35,11 @@
     text-align: center;
     font-style: italic;
     background-color: azure;
-    background: url(https://www.jpl.nasa.gov/images/kepler/20170522/trappist1h20170522-home.gif) no-repeat center center fixed; 
+    background: url(http://www.planwallpaper.com/static/images/background-wallpapers-2.jpg) no-repeat center center fixed; 
   webkit-background-size: cover;
   moz-background-size: cover;
   o-background-size: cover;
+  
   background-size: cover;">
 
 <article>
@@ -28,7 +49,8 @@
     font-family: serif;
     font-style: italic;
     font-feature-settings: initial;
-    color: rgba(169, 66, 66, 0.98);">Get the files or folders from One Micorsoft One Drive Cloud from the shared link</h1>
+    padding-top: 43px;
+    color: #FF5722;">Get the files or folders from One Micorsoft One Drive Cloud from the shared link</h1>
     
     </div>
   </header>
@@ -40,8 +62,9 @@
     font-style: italic;
     font-feature-settings: initial;
     color: rgba(24, 69, 243, 0.82);
-    width: 1545px;
+    width: 1750px;
     margin-top: 60px;
+     font-size: 18pt;
     font-weight: bold;"
 
 > Personal Items </p></div>
@@ -79,13 +102,14 @@ box-shadow: 0 0 20px black;
 <div style="text-align:center"> 
 
 <p style="text-align:center
-    font-size: x-large;
+     font-size: x-large;
     font-style: italic;
     font-feature-settings: initial;
     color: rgba(24, 69, 243, 0.82);
-    width: 1545px;
-     font-weight: bold;
-    margin-top: 60px;"
+    width: 1750px;
+    margin-top: 60px;
+     font-size: 18pt;
+    font-weight: bold;"
 
 > Shared Items </p>
 <form name="myForm2" action="shareditems" method="POST">

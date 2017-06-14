@@ -7,7 +7,13 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletException;
@@ -25,13 +31,14 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.log4j.Logger;
+import org.apache.poi.POIXMLProperties;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.internal.PackagePropertiesPart;
 import org.apache.xmlbeans.XmlException;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -274,11 +281,23 @@ public class HelloController {
 		byte[] fileArray= filePart.getSubmittedFileName().getBytes();
 
 		logger.info("inside upload files");
+		
+		long sizeOfInputStream = (long)fileContent.available();
+
+		long fourMBbsize= 4194304;
+		int count = 0;
+
+		if(sizeOfInputStream>4194304){
+			return service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
+		}
+		
 		return service.uploadDocumentsToOneDrive(tokenAndPath,fileContent,nameOfFile);
 		//return "displayPath";
 	}
 
-	//method to upload files to one drive
+	
+	
+	//method to add comment to a file 
 	@RequestMapping(method = RequestMethod.GET, value="onedrive/comment")
 	public ModelAndView addComment() throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, 
 	OpenXML4JException, XmlException, ServletException, FileUploadException, TransformerFactoryConfigurationError, ParserConfigurationException, SAXException, TransformerException {
@@ -290,7 +309,7 @@ public class HelloController {
 
 		DocumentBuilder db = dbf.newDocumentBuilder();
 
-
+String path= "C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf";
 
 		Document doc = db.parse(new FileInputStream(new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf")));
 
@@ -300,12 +319,27 @@ public class HelloController {
 
 		Comment comment = doc.createComment("This is a comment");
 		element.getParentNode().insertBefore(comment, element);
+		
+		Path path1;
+		
+		
+		File myFile=new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/roles.docx");
+		OPCPackage pkg = OPCPackage.open(myFile);
+		POIXMLProperties poixmlProperties= new POIXMLProperties(pkg);
+		
+		PackagePropertiesPart ppropsPart = poixmlProperties.getCoreProperties().getUnderlyingProperties();
+		ppropsPart.setTitleProperty("changed by admin ");
+		
+		ppropsPart.getContentTypeDetails();
+		
+		URL resource = getClass().getResource("testfile.txt");
+		
+		 path1 = Paths.get(resource.toURI());
+
+		 Files.setAttribute(path1, "user:xdg.comment", ByteBuffer.wrap("Halllo".getBytes(StandardCharsets.UTF_8)), LinkOption.NOFOLLOW_LINKS);
 
 
-
-
-
-
+	 Attributes attributes = Attributes.loadUserAttributes(path1);
 
 		Transformer tf = TransformerFactory.newInstance().newTransformer();
 

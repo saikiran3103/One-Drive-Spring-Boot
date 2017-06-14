@@ -1,38 +1,27 @@
 package com.onedrive;
 
-import java.io.Serializable;
+/**
+ * Data object for drive user
+ */
+public class DriveUser {
+    private String id;
+    private String displayName;
 
-public class DriveUser implements Serializable{
+    public DriveUser(String displayName, String id) {
+        this.displayName = displayName;
+        this.id = id;
+    }
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6774171335309190914L;
-	
-	
-	
-	private String driveId;
+    public String getDisplayName() {
+        return displayName;
+    }
 
+    public String getId() {
+        return id;
+    }
 
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return "DriveUser [driveId=" + driveId + "]";
-	}
-
-
-
-	public String getDriveId() {
-		return driveId;
-	}
-
-
-
-	public void setDriveId(String driveId) {
-		this.driveId = driveId;
-	}
-
+    @Override
+    public String toString() {
+        return "Owner: " + displayName + " - " + id;
+    }
 }

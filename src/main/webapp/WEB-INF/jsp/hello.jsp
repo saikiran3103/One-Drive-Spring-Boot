@@ -47,7 +47,7 @@
     font-style: inherit;
     font-feature-settings: initial;
     color: #3f3430;
-    width: 1545px;
+    width: 1800px;
     margin-top: 85px;
     ">Use the button below to connect to Office 365.</p>
     </div>
