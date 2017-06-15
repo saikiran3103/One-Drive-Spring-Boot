@@ -38,7 +38,7 @@
     text-align: center;
     font-feature-settings: initial;
     color: #f44336;
-    width: 1750px;
+    width: 1550px;
     margin-top: 85px;">Provide upload details</div>
  
  <div  style="
@@ -47,7 +47,7 @@
     font-style: inherit;
     font-feature-settings: initial;
     color: #f44336;
-   width: 1750px;
+   width: 1550px;
     margin-top: 85px;">
         <form method="POST" action="uploadfiles" enctype="multipart/form-data" >
             File:
