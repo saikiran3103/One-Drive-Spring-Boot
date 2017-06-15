@@ -287,9 +287,9 @@ public class OneDriveController {
 		int count = 0;
 
 		if(sizeOfInputStream>4194304){
-			return service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
+		//	return service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
 			
-		//	return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath,fileContent,nameOfFile);
+		return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath,fileContent,nameOfFile);
 		}
 		
 		return service.uploadDocumentsToOneDrive(tokenAndPath,fileContent,nameOfFile);

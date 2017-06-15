@@ -1618,6 +1618,8 @@ public class UserServiceImpl implements UserService {
             long nextRanges=0L;
             
             long fileInputStreamIntilialSize= fileInputStream.available();
+            finished = false;
+            canceled = false;
 			while (!canceled && !finished){
 
 
@@ -1647,7 +1649,7 @@ public class UserServiceImpl implements UserService {
 					// never bigger than MAXINT
 					bytes = new byte[(int) (fileInputStream.available())];
 					content_length= (int)fileInputStream.available();
-					endRange=(numToCalculateEndrange-1)*chunkSize+content_length;
+					endRange=(numToCalculateEndrange-1)*chunkSize+content_length-1;
 				}
 
 		//		long start = randFile.getFilePointer();
@@ -1689,6 +1691,8 @@ public class UserServiceImpl implements UserService {
 				builder.header("Authorization", "bearer " +access_token );
 				Request request = builder.build();
 				OkHttpClient client = new OkHttpClient();
+				client.setConnectTimeout(60, TimeUnit.SECONDS); // connect timeout
+				client.setReadTimeout(60, TimeUnit.SECONDS);
 				Response response=    client.newCall(request).execute();
 
 				ConcreteOneResponse concreteOneResponse1=   new ConcreteOneResponse(response);
