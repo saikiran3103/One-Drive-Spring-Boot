@@ -7,6 +7,8 @@ package com.onedrive;
  */
 public class UploadSession {
 	
+	
+
 	private String uploadUrl;
 	private long expirationDate;
 	private String[] nextExpectedRanges;
@@ -40,4 +42,20 @@ public class UploadSession {
             return 0;
 		}
 	}
+	
+	/**
+	 * @return the nextExpectedRanges
+	 */
+	public String[] getNextExpectedRanges() {
+		return nextExpectedRanges;
+	}
+
+	/**
+	 * @param nextExpectedRanges the nextExpectedRanges to set
+	 */
+	public void setNextExpectedRanges(String[] nextExpectedRanges) {
+		this.nextExpectedRanges = nextExpectedRanges;
+	}
+	
+	
 }

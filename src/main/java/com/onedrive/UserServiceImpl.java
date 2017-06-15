@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,16 +63,13 @@ import com.squareup.okhttp.Response;
 public class UserServiceImpl implements UserService {
 
 	private static final int BUFFER_SIZE = 4096;
-	
-	private OneFolder folder;
+
 	private UploadSession uploadSession;
-	 
-	 private String baseUrl = "https://api.onedrive.com/v1.0/";
-	 private boolean canceled = false;
+
+	private String baseUrl = "https://api.onedrive.com/v1.0/";
+	private boolean canceled = false;
 	private boolean finished = false;
-	 
-	 private final ReentrantLock shouldRun = new ReentrantLock(true);
-	 
+
 	private static final int chunkSize = 320 * 1024 * 30;
 	final static Logger logger = Logger.getLogger(UserServiceImpl.class);
 
@@ -79,9 +77,9 @@ public class UserServiceImpl implements UserService {
 
 	private String saveDir = home;
 
-	private WordExtractor wd;
-	
-	
+	private RandomAccessFile randFile;
+
+
 
 	@Override
 	public String authorizeAndGetUserToken() throws URISyntaxException  {
@@ -248,8 +246,8 @@ public class UserServiceImpl implements UserService {
 
 			}
 
-			
-			
+
+
 			// folder execution starts from here
 			enterLinkView.setViewName("display");
 
@@ -304,7 +302,7 @@ public class UserServiceImpl implements UserService {
 
 			String responseFromAdaptor= responseAndMessage.getResponse();
 
-			 Gson gson = new Gson();
+			Gson gson = new Gson();
 
 
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
@@ -401,12 +399,12 @@ public class UserServiceImpl implements UserService {
 
 		logger.info("files read from the directory "+filesInFolder);
 		ExecutorService converterExecutor = Executors.newFixedThreadPool(1);
-	
-		for(File officefile:filesInFolder){
-			
 
-//			//parallel conversion of all files 
-		//	converterExecutor.execute(converter);
+		for(File officefile:filesInFolder){
+
+
+			//			//parallel conversion of all files 
+			//	converterExecutor.execute(converter);
 			Runnable converter = new ParallelConverter(officefile, file);
 			converterExecutor.execute(converter);
 
@@ -455,7 +453,7 @@ public class UserServiceImpl implements UserService {
 		SuccessMessageObject messageObject= UserServiceImpl.doGet(OneDriveinsideFolderUrl, tokenheader);
 
 		String responseFromAdaptor1=messageObject.getResponse();
-		
+
 
 		if(messageObject.getMessage()!=null && messageObject.getMessage().equalsIgnoreCase("error")){
 			Error error = gson.fromJson(responseFromAdaptor1, Error.class);
@@ -493,7 +491,7 @@ public class UserServiceImpl implements UserService {
 				executor1.execute(download1);
 			}
 			executor1.shutdown();
-			
+
 			try {
 				executor1.awaitTermination(900, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
@@ -776,9 +774,9 @@ public class UserServiceImpl implements UserService {
 
 
 			String driveId = tokenAndPath.getDriveId();
-			
+
 			String fileUrl=tokenAndPath.getPath();
-			
+
 			String commonUrl ="https://graph.microsoft.com/beta";
 
 			if(fileUrl.contains("?")){
@@ -786,16 +784,16 @@ public class UserServiceImpl implements UserService {
 
 				fileUrl= fileUrl.substring(0, indexOfQueryParam);
 			}
-			
+
 			if((fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".PDF")) || (fileUrl.endsWith(".DOCS"))|| (fileUrl.endsWith(".docs")) 
 					|| (fileUrl.endsWith(".DOCX"))|| (fileUrl.endsWith(".docx")) || (fileUrl.endsWith(".pptx")) || (fileUrl.endsWith(".PPTX")) || 
 					(fileUrl.endsWith(".PPT")) || (fileUrl.endsWith(".ppt"))
 					|| (fileUrl.endsWith(".pdf")) || (fileUrl.endsWith(".xlsx")) || (fileUrl.endsWith(".XLSX")) || (fileUrl.endsWith(".xls")) ||
 					(fileUrl.endsWith(".XLS"))){
-				
-				
-				
-				
+
+
+
+
 
 				String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
 
@@ -872,10 +870,10 @@ public class UserServiceImpl implements UserService {
 				enterLinkView.setViewName("display");
 
 				return enterLinkView;
-				
+
 			}
 
-			
+
 
 			//	String base_path = "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
 			String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
@@ -925,7 +923,7 @@ public class UserServiceImpl implements UserService {
 
 			final Gson gson = new Gson();
 
-		
+
 
 
 			if(responseAndMessage.getMessage()!=null && responseAndMessage.getMessage().equalsIgnoreCase("error")){
@@ -1002,28 +1000,28 @@ public class UserServiceImpl implements UserService {
 	 * (non-Javadoc)
 	 * @see com.onedrive.UserService#uploadDocumentsToOneDrive(com.onedrive.TokenAndPath, java.io.InputStream, java.lang.String)
 	 */
-	
-	
+
+
 	@Override
 	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath,InputStream fileInputStream, String nameOfFile) throws ClientProtocolException, IOException, MessagingException {
-		
-		
-		
+
+
+
 
 		ModelAndView uploadFileView = new ModelAndView();
-		
+
 		String access_token= tokenAndPath.getToken();
 
-		
+
 
 
 
 		String driveId = tokenAndPath.getDriveId();
-		
-		
-		
+
+
+
 		String commonUrl ="https://graph.microsoft.com/v1.0/drives/";
-		
+
 		String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
 
 		// gets the start index after the documents path
@@ -1032,74 +1030,74 @@ public class UserServiceImpl implements UserService {
 
 		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
 
-	
 
 
-		
+
+
 
 
 		String contentStringAppender =":/content";
-		
+
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
 		String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
-		
-		
-		 
-	//	 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
+
+
+
+		//	 String completeurl ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
 		try 
-		
-		 {
+
+		{
 
 
-			 byte [] bytearray = new byte [tokenAndPath.getFileSize()];
-			
-			 BufferedInputStream bin = new BufferedInputStream(fileInputStream); 
-			 bin.read(bytearray,0,bytearray.length);
+			byte [] bytearray = new byte [tokenAndPath.getFileSize()];
 
-			
-		   
+			BufferedInputStream bin = new BufferedInputStream(fileInputStream); 
+			bin.read(bytearray,0,bytearray.length);
 
 
-		        URL uploadURL = new URL( completeurl.toString() );
 
-		      HttpURLConnection uploadConn = (HttpURLConnection)uploadURL.openConnection();
-		     
 
-		        uploadConn.setRequestMethod( "PUT" );
-		        uploadConn.setUseCaches(false);
-		        uploadConn.setDoOutput( true );         
 
-		        uploadConn.setRequestProperty("Authorization", "Bearer " + access_token);  // this is right
-		        uploadConn.setRequestProperty("Content-Type", "application/octet-stream");
+			URL uploadURL = new URL( completeurl.toString() );
 
-		        uploadConn.setChunkedStreamingMode( 0 );
-		     
-		        try (OutputStream os = uploadConn.getOutputStream()) {
-	             os.write(bytearray,0,bytearray.length);
-		            os.flush();
-		          
-	            
-		        }
-		     
+			HttpURLConnection uploadConn = (HttpURLConnection)uploadURL.openConnection();
 
-		        uploadConn.disconnect();
 
-		 }
-		
+			uploadConn.setRequestMethod( "PUT" );
+			uploadConn.setUseCaches(false);
+			uploadConn.setDoOutput( true );         
+
+			uploadConn.setRequestProperty("Authorization", "Bearer " + access_token);  // this is right
+			uploadConn.setRequestProperty("Content-Type", "application/octet-stream");
+
+			uploadConn.setChunkedStreamingMode( 0 );
+
+			try (OutputStream os = uploadConn.getOutputStream()) {
+				os.write(bytearray,0,bytearray.length);
+				os.flush();
+
+
+			}
+
+
+			uploadConn.disconnect();
+
+		}
+
 		catch(Exception ex){
 			SuccessMessageObject messageObject= new SuccessMessageObject();
 			messageObject.setMessage("Error occured  Reason: "+ex.getMessage());
 			uploadFileView.addObject("message",messageObject );
 			uploadFileView.setViewName("display");
 		}
-		
+
 		SuccessMessageObject messageObject= new SuccessMessageObject();
 		messageObject.setMessage("successfully uploaded "+nameOfFile+ " to users shared drive");
 		uploadFileView.addObject("message",messageObject );
 		uploadFileView.setViewName("display");
-		
-		
-	
+
+
+
 		return uploadFileView;
 	}
 
@@ -1107,22 +1105,22 @@ public class UserServiceImpl implements UserService {
 	public ModelAndView uploadLargeDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
 			String nameOfFile) throws ClientProtocolException, IOException, MessagingException {
 
-		
-		
+
+
 		ModelAndView uploadFileView = new ModelAndView();
-		
+
 		String access_token= tokenAndPath.getToken();
 
-		
+
 
 
 
 		String driveId = tokenAndPath.getDriveId();
-		
-		
-		
+
+
+
 		String commonUrl ="https://graph.microsoft.com/v1.0/drives/";
-		
+
 		String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
 
 		// gets the start index after the documents path
@@ -1131,27 +1129,27 @@ public class UserServiceImpl implements UserService {
 
 		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
 
-	
 
 
-		
+
+
 
 
 		String contentStringAppender =":/content";
-		
+
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
 		String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
-		
-		
+
+
 		try 
-		
-		 {
+
+		{
 
 			String sessionCreateUrl = commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+":/createUploadSession";
-			
-			
-			
-			
+
+
+
+
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			final HttpPost httpRequest = new HttpPost( sessionCreateUrl );
 
@@ -1178,79 +1176,79 @@ public class UserServiceImpl implements UserService {
 
 
 			final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) response.getEntity();
-			
+
 			final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
-			
+
 			EntityUtils.consume( entity );
-			
+
 			logger.info(httpRequest.toString());
-			
+
 			System.out.println(responseString);
-			
+
 			httpClient.getConnectionManager().shutdown();
 
 
 
-        	UploadSessionCreateResponse uploadSessionCreateResponse =gson.fromJson(responseString, UploadSessionCreateResponse.class);
+			UploadSessionCreateResponse uploadSessionCreateResponse =gson.fromJson(responseString, UploadSessionCreateResponse.class);
 
 			String uploadUrl=uploadSessionCreateResponse.getUploadUrl();
 
 
 			URL uploadURL = new URL( uploadUrl.toString() );
-			
-			 
-			
-			 int size = 2*1024*1024;
-			    byte buffer[] = new byte[size];
 
-			    int totalSizeOfStream= fileInputStream.available();
-			    int startRange=0;
-			    int count = 0;
-			    int endRange= size-1;
-			    HttpURLConnection uploadConn = (HttpURLConnection)uploadURL.openConnection();
-			    uploadConn.setDoOutput( true );
-			    uploadConn.setRequestMethod( "PUT" );
-		        uploadConn.setUseCaches(false);
-		        OutputStream os= null;
-			    while (true) {
-			      int i = fileInputStream.read(buffer, 0, size);
-			      if (i == -1)
-				        break;
-			     
-			      
 
-			       
-			                
 
-			        uploadConn.setRequestProperty("Authorization", "Bearer " + access_token);  // this is right
-			        uploadConn.setRequestProperty("Content-Type", "application/octet-stream");
-			        
-			        if(i<size){
-			        	endRange=startRange+i-1;
-			        }
-			        String ContentRangeHeader= "bytes "+startRange+"-"+endRange+"/"+totalSizeOfStream;
-			        
-			        
-			        uploadConn.setRequestProperty("Content-Range", ContentRangeHeader);
-			       
-			     
-			    
-			    os = uploadConn.getOutputStream();
-			         
-				           os.write(buffer, 0, i);
-				           os.close();  
-				            startRange=endRange+1;
-				            endRange= endRange+size;
-			      ++count;
-			    
-			      }
-			   fileInputStream.close();
-			   os.flush();
-			   os.close();
-				
-			    uploadConn.disconnect();
-			   			    }
-		
+			int size = 2*1024*1024;
+			byte buffer[] = new byte[size];
+
+			int totalSizeOfStream= fileInputStream.available();
+			int startRange=0;
+			int count = 0;
+			int endRange= size-1;
+			HttpURLConnection uploadConn = (HttpURLConnection)uploadURL.openConnection();
+			uploadConn.setDoOutput( true );
+			uploadConn.setRequestMethod( "PUT" );
+			uploadConn.setUseCaches(false);
+			OutputStream os= null;
+			while (true) {
+				int i = fileInputStream.read(buffer, 0, size);
+				if (i == -1)
+					break;
+
+
+
+
+
+
+				uploadConn.setRequestProperty("Authorization", "Bearer " + access_token);  // this is right
+				uploadConn.setRequestProperty("Content-Type", "application/octet-stream");
+
+				if(i<size){
+					endRange=startRange+i-1;
+				}
+				String ContentRangeHeader= "bytes "+startRange+"-"+endRange+"/"+totalSizeOfStream;
+
+
+				uploadConn.setRequestProperty("Content-Range", ContentRangeHeader);
+
+
+
+				os = uploadConn.getOutputStream();
+
+				os.write(buffer, 0, i);
+				os.close();  
+				startRange=endRange+1;
+				endRange= endRange+size;
+				++count;
+
+			}
+			fileInputStream.close();
+			os.flush();
+			os.close();
+
+			uploadConn.disconnect();
+		}
+
 		catch(Exception ex){
 			SuccessMessageObject messageObject= new SuccessMessageObject();
 			messageObject.setMessage("Error occured  Reason: "+ex.getMessage());
@@ -1258,35 +1256,35 @@ public class UserServiceImpl implements UserService {
 			uploadFileView.setViewName("display");
 			return uploadFileView;
 		} 
-		
+
 		SuccessMessageObject messageObject= new SuccessMessageObject();
 		messageObject.setMessage("successfully uploaded "+nameOfFile+ " to users shared drive");
 		uploadFileView.addObject("message",messageObject );
 		uploadFileView.setViewName("display");
-		
-		
-	
+
+
+
 		return uploadFileView;
-			}
+	}
 
 	@Override
 	public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath, InputStream fileInputStream,
 			String nameOfFile) throws ClientProtocolException, IOException, MessagingException {
-		
-ModelAndView uploadFileView = new ModelAndView();
-		
+
+		ModelAndView uploadFileView = new ModelAndView();
+
 		String access_token= tokenAndPath.getToken();
 
-		
+
 
 		byte[] bytes;
 
 		String driveId = tokenAndPath.getDriveId();
-		
-		
-		
+
+
+
 		String commonUrl ="https://graph.microsoft.com/v1.0/drives/";
-		
+
 		String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
 
 		// gets the start index after the documents path
@@ -1295,27 +1293,261 @@ ModelAndView uploadFileView = new ModelAndView();
 
 		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
 
-	
 
 
-		
+
+
 
 
 		String contentStringAppender =":/content";
-		
+
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
 		String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
-		
-		
-		try 
-		
-		 {
 
-			String sessionCreateUrl = commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+":/createUploadSession";
+
+		try 
+
+		{
+
+			String sessionCreateUrl =
+					commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+":/createUploadSession"+"?@name.conflictBehavior=replace";
+
+
+
+
+			DefaultHttpClient httpClient = new DefaultHttpClient();
+			final HttpPost httpRequest = new HttpPost( sessionCreateUrl );
+
+
+			Item item = new Item();
+			item.setMicrosoft_graph_conflictBehavior("replace");
+			UploadSessionBody uploadBody= new UploadSessionBody();
+
+			uploadBody.setItem(item);
+
+			Gson  gson= new Gson();
+
+			String jsonBody= 	gson.toJson(uploadBody);
+			
+			logger.info(jsonBody);
+
+			httpRequest.addHeader("Content-Type", "application/json");
+			httpRequest.addHeader("Authorization", "Bearer " + access_token);
+
+			logger.info(httpRequest.getMethod());
+
+
+			final StringEntity input = new StringEntity(jsonBody );
 			
 			
+			httpRequest.setEntity(input);
+
+			HttpResponse concreteOneResponse = httpClient.execute(httpRequest);
+
+
+
+
+			final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) concreteOneResponse.getEntity();
+
+			final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
+
+			EntityUtils.consume( entity );
+
+			logger.info(httpRequest.toString());
+
+			System.out.println(responseString);
 			
+			logger.info(responseString);
+
+			httpClient.getConnectionManager().shutdown();
+
+
+
+			UploadSessionCreateResponse uploadSessionCreateResponse =gson.fromJson(responseString, UploadSessionCreateResponse.class);
+
+			String uploadUrl=uploadSessionCreateResponse.getUploadUrl();
+
+
+			URL uploadURL = new URL( uploadUrl.toString() );
+
+			//		("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/largepdf.pdf");Sample large docx
+
+			//C:/Users/sai.kiran.akkireddy/Downloads/testDownload/oversize_pdf_test_0.pdf
+
+			File fileToUpload =new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/oversize_pdf_test_0.pdf");
+
 			
+
+
+
+            randFile = new RandomAccessFile(fileToUpload, "r");
+
+			while (!canceled && !finished){
+
+
+				long currFirstByte = randFile.getFilePointer();
+                
+				logger.info("currFirstByte   "+currFirstByte);
+
+				PreparedRequest uploadChunk = new PreparedRequest(uploadUrl, PreparedRequestMethod.PUT);
+				if (currFirstByte + chunkSize < randFile.length()) {
+					bytes = new byte[chunkSize];
+				}
+				else {
+					// optimistic cast, assuming the last bit of the file is
+					// never bigger than MAXINT
+					bytes = new byte[(int) (randFile.length() - randFile.getFilePointer())];
+				}
+
+				long start = randFile.getFilePointer();
+				randFile.readFully(bytes);
+				uploadChunk.setBody(bytes);
+				uploadChunk.addHeader("Content-Length", (randFile.getFilePointer() - start) + "");
+				uploadChunk.addHeader(
+						"Content-Range",
+						String.format("bytes %s-%s/%s", start, randFile.getFilePointer() - 1, randFile.length()));
+				long end_range=  randFile.getFilePointer()- 1;
+				logger.info("Uploading chunk {} - {}"+start+"-"+end_range);
+				String url ;
+				RequestBody body = null;
+
+				if (uploadChunk.getBody() != null) {
+					body = RequestBody.create(null, uploadChunk.getBody());
+				}
+
+				if (isCompleteURL(uploadChunk.getPath())) {
+					url = uploadChunk.getPath();
+				} else {
+					url = String.format("%s%s?access_token=%s", this.baseUrl, uploadChunk.getPath(),access_token);
+				}
+
+				logger.debug(String.format("making request to %s",url));
+
+				Request.Builder builder = new Request.Builder().method(uploadChunk.getMethod(), body).url(url);
+
+				for (String key : uploadChunk.getHeader().keySet()) {
+					logger.info("key  "+key+"--"+uploadChunk.getHeader().get(key) );
+					builder.addHeader(key, uploadChunk.getHeader().get(key));
+				}
+
+				//Add auth permanently to header with redirection
+				
+			
+				builder.header("Authorization", "bearer " +access_token );
+				Request request = builder.build();
+				OkHttpClient client = new OkHttpClient();
+				client.setConnectTimeout(60, TimeUnit.SECONDS); // connect timeout
+				client.setReadTimeout(60, TimeUnit.SECONDS);
+				Response response=    client.newCall(request).execute();
+
+				ConcreteOneResponse concreteOneResponse1=   new ConcreteOneResponse(response);
+				if (concreteOneResponse1.wasSuccess()) {
+					if (concreteOneResponse1.getStatusCode()==200 || concreteOneResponse1.getStatusCode()==201) { 
+						// if last chunk upload was successful end the
+						finished = true;
+						String resp =concreteOneResponse1.getBodyAsString();
+						logger.info(resp);
+						
+						System.out.println(resp);
+						SuccessMessageObject messageObject= new SuccessMessageObject();
+						messageObject.setMessage("successfully uploaded "+nameOfFile+ " to users shared drive");
+						uploadFileView.addObject("message",messageObject );
+						uploadFileView.setViewName("display");
+					}else {
+						//just continue
+						String resp =concreteOneResponse1.getBodyAsString();
+						logger.info(resp);
+						System.out.println(resp);
+						uploadSession= gson.fromJson(concreteOneResponse1.getBodyAsString(),
+								UploadSession.class);
+
+						
+						
+						
+						
+					logger.info("uploadSession.getNextExpectedRanges()   "+Arrays.toString(uploadSession.getNextExpectedRanges()));
+						
+						long nextRanges= uploadSession.getNextRange();
+						randFile.seek(((com.onedrive.UploadSession) uploadSession).getNextRange());
+					}
+				}}}
+		catch (Exception e) {
+
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage("Error occured  Reason: "+e.getMessage());
+			uploadFileView.addObject("message",messageObject );
+			uploadFileView.setViewName("display");
+			System.out.println(e.getMessage());
+			logger.error(e.getMessage());
+			return uploadFileView;
+
+			// TODO: handle exception
+		}
+		return uploadFileView;
+	}
+
+	private boolean isCompleteURL(String url) {
+		try {
+			URL u = new URL(url); // this would check for the protocol
+			u.toURI();// does the extra checking required for validation of URI
+		} catch (URISyntaxException | MalformedURLException e) {
+			// if exception then no url
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath,
+			InputStream fileInputStream, String nameOfFile)
+			throws ClientProtocolException, IOException, MessagingException {
+		
+		
+		
+
+
+		ModelAndView uploadFileView = new ModelAndView();
+
+		String access_token= tokenAndPath.getToken();
+
+
+
+		byte[] bytes;
+
+		String driveId = tokenAndPath.getDriveId();
+
+
+
+		String commonUrl ="https://graph.microsoft.com/v1.0/drives/";
+
+		String base_path = tokenAndPath.getPath();//replaceAll("%20", " ");
+
+		// gets the start index after the documents path
+		int indexAfterDocuments =base_path.lastIndexOf("Documents")+10;
+
+
+		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
+
+
+
+
+
+
+
+		String contentStringAppender =":/content";
+
+		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
+		String completeurl= commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+contentStringAppender;
+
+
+		try 
+
+		{
+
+			String sessionCreateUrl = commonUrl+driveId+"/root:/"+folderPathAfterdocuments+"/"+nameOfFileFormatted+":/createUploadSession"+"?@name.conflictBehavior=replace";
+
+
+
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			final HttpPost httpRequest = new HttpPost( sessionCreateUrl );
 
@@ -1338,147 +1570,171 @@ ModelAndView uploadFileView = new ModelAndView();
 
 			final StringEntity input = new StringEntity(jsonBody );
 
+			httpRequest.setEntity(input);
+
 			HttpResponse concreteOneResponse = httpClient.execute(httpRequest);
 
 
+
+
 			final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) concreteOneResponse.getEntity();
-			
+
 			final String responseString = EntityUtils.toString( (org.apache.http.HttpEntity) entity, "UTF-8" );
-			
+
 			EntityUtils.consume( entity );
-			
+
 			logger.info(httpRequest.toString());
-			
+
 			System.out.println(responseString);
 			
+			logger.info(responseString);
+
 			httpClient.getConnectionManager().shutdown();
 
 
 
-        	UploadSessionCreateResponse uploadSessionCreateResponse =gson.fromJson(responseString, UploadSessionCreateResponse.class);
+			UploadSessionCreateResponse uploadSessionCreateResponse =gson.fromJson(responseString, UploadSessionCreateResponse.class);
 
 			String uploadUrl=uploadSessionCreateResponse.getUploadUrl();
 
 
 			URL uploadURL = new URL( uploadUrl.toString() );
-		
-		File fileToUpload =new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/largepdf.pdf");
-		
-		 OneDriveSession session= new OneDriveSession(null, uploadUrl, uploadUrl, uploadUrl, null, null);
-		 
-//		  api = OneDriveFactory.createOneDriveSDK(OneDriveCredentials.getClientId(), OneDriveCredentials.getClientSecret(), "http://localhost:8080/onedrive/redirect"
-//	                , OneDriveScope.OFFLINE_ACCESS);
-		
-		session.setAccessToken(access_token);
+
+			//		("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/largepdf.pdf");Sample large docx
+
+			//C:/Users/sai.kiran.akkireddy/Downloads/testDownload/oversize_pdf_test_0.pdf
+
+		//	File fileToUpload =new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/large_docx.docx");
+
 			
-			
-			
-		
-			
-//		folder.uploadFile(fileToUpload, uploadUrl);
-//		ConsoleClient consoleClient= new ConsoleClient(folder);
-//		consoleClient.uploadFile("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/largepdf.pdf",uploadUrl);
-		RandomAccessFile randFile=new RandomAccessFile(fileToUpload, "r");
-		
-		while (!canceled && !finished){
-		
-		
-		long currFirstByte = randFile.getFilePointer();
-		
-	
-		PreparedRequest uploadChunk = new PreparedRequest(uploadUrl, PreparedRequestMethod.PUT);
-		if (currFirstByte + chunkSize < randFile.length()) {
-			bytes = new byte[chunkSize];
-		 }
-		else {
-			// optimistic cast, assuming the last bit of the file is
-			// never bigger than MAXINT
-            bytes = new byte[(int) (randFile.length() - randFile.getFilePointer())];
-        }
-		
-		long start = randFile.getFilePointer();
-		randFile.readFully(bytes);
-		uploadChunk.setBody(bytes);
-        uploadChunk.addHeader("Content-Length", (randFile.getFilePointer() - start) + "");
-        uploadChunk.addHeader(
-                "Content-Range",
-                String.format("bytes %s-%s/%s", start, randFile.getFilePointer() - 1, randFile.length()));
 
-     //   logger.info("Uploading chunk {} - {}"+start+"-"+ randFile.getFilePointer() - 1);
-        String url ;
-        RequestBody body = null;
-        
-        if (uploadChunk.getBody() != null) {
-            body = RequestBody.create(null, uploadChunk.getBody());
-        }
-        
-        if (isCompleteURL(uploadChunk.getPath())) {
-            url = uploadChunk.getPath();
-        } else {
-            url = String.format("%s%s?access_token=%s", this.baseUrl, uploadChunk.getPath(),access_token);
-        }
-        
-        logger.debug(String.format("making request to %s",url));
 
-        Request.Builder builder = new Request.Builder().method(uploadChunk.getMethod(), body).url(url);
 
-        for (String key : uploadChunk.getHeader().keySet()) {
-            builder.addHeader(key, uploadChunk.getHeader().get(key));
-        }
+    //        randFile = new RandomAccessFile(fileToUpload, "r");
+            
+            int numToCalculateEndrange=1;
+            int endRange=0;
+            int content_length=0;
+            long nextRanges=0L;
+            
+            long fileInputStreamIntilialSize= fileInputStream.available();
+			while (!canceled && !finished){
 
-        //Add auth permanently to header with redirection
-        builder.header("Authorization", "bearer " +access_token );
-        Request request = builder.build();
-        OkHttpClient client = new OkHttpClient();
-   Response response=    client.newCall(request).execute();
-        
-        ConcreteOneResponse concreteOneResponse1=   new ConcreteOneResponse(response);
-        if (concreteOneResponse1.wasSuccess()) {
-			if (concreteOneResponse1.getStatusCode()==200 || concreteOneResponse1.getStatusCode()==201) { 
-				// if last chunk upload was successful end the
-				finished = true;
-                String resp =concreteOneResponse1.getBodyAsString();
 
-            }else {
-				//just continue
-                 uploadSession= gson.fromJson(concreteOneResponse1.getBodyAsString(),
-						UploadSession.class);
-                 
-                 long nextRanges= uploadSession.getNextRange();
-                randFile.seek(((com.onedrive.UploadSession) uploadSession).getNextRange());
-			}
-		}}}
+								
+				long currFirstByteStream = 0L;
+
+
+				PreparedRequest uploadChunk = new PreparedRequest(uploadUrl, PreparedRequestMethod.PUT);
+//				if (currFirstByte + chunkSize < randFile.length()) {
+//					bytes = new byte[chunkSize];
+//					
+//				}
+				if (nextRanges + chunkSize < fileInputStream.available()) {
+					bytes = new byte[chunkSize];
+					content_length=chunkSize;
+					endRange= numToCalculateEndrange*chunkSize-1;
+					numToCalculateEndrange++;
+				}
+//				else {
+//					// optimistic cast, assuming the last bit of the file is
+//					// never bigger than MAXINT
+//					bytes = new byte[(int) (randFile.length() - randFile.getFilePointer())];
+//				}
+				
+				else {
+					// optimistic cast, assuming the last bit of the file is
+					// never bigger than MAXINT
+					bytes = new byte[(int) (fileInputStream.available())];
+					content_length= (int)fileInputStream.available();
+					endRange=(numToCalculateEndrange-1)*chunkSize+content_length;
+				}
+
+		//		long start = randFile.getFilePointer();
+			//	randFile.readFully(bytes);
+				fileInputStream.read(bytes);
+				uploadChunk.setBody(bytes);
+				
+				String Content_length = Integer.toString(content_length);
+				uploadChunk.addHeader("Content-Length", (content_length) + "");
+				
+		//		uploadChunk.addHeader("Content-Length", (randFile.getFilePointer() - start) + "");
+				uploadChunk.addHeader(
+						"Content-Range",
+						String.format("bytes %s-%s/%s", nextRanges, endRange, fileInputStreamIntilialSize));
+				
+				logger.info("Uploading chunk {} - {}"+nextRanges+"-"+endRange);
+				String url ;
+				RequestBody body = null;
+
+				if (uploadChunk.getBody() != null) {
+					body = RequestBody.create(null, uploadChunk.getBody());
+				}
+
+				if (isCompleteURL(uploadChunk.getPath())) {
+					url = uploadChunk.getPath();
+				} else {
+					url = String.format("%s%s?access_token=%s", this.baseUrl, uploadChunk.getPath(),access_token);
+				}
+
+				logger.debug(String.format("making request to %s",url));
+
+				Request.Builder builder = new Request.Builder().method(uploadChunk.getMethod(), body).url(url);
+
+				for (String key : uploadChunk.getHeader().keySet()) {
+					builder.addHeader(key, uploadChunk.getHeader().get(key));
+				}
+
+				//Add auth permanently to header with redirection
+				builder.header("Authorization", "bearer " +access_token );
+				Request request = builder.build();
+				OkHttpClient client = new OkHttpClient();
+				Response response=    client.newCall(request).execute();
+
+				ConcreteOneResponse concreteOneResponse1=   new ConcreteOneResponse(response);
+				if (concreteOneResponse1.wasSuccess()) {
+					if (concreteOneResponse1.getStatusCode()==200 || concreteOneResponse1.getStatusCode()==201) { 
+						// if last chunk upload was successful end the
+						finished = true;
+						String resp =concreteOneResponse1.getBodyAsString();
+						SuccessMessageObject messageObject= new SuccessMessageObject();
+						messageObject.setMessage("successfully uploaded "+nameOfFile+ " to users shared drive");
+						uploadFileView.addObject("message",messageObject );
+						uploadFileView.setViewName("display");
+					}else {
+						//just continue
+						uploadSession= gson.fromJson(concreteOneResponse1.getBodyAsString(),
+								UploadSession.class);
+
+						 nextRanges= uploadSession.getNextRange();
+//						randFile.seek(((com.onedrive.UploadSession) uploadSession).getNextRange());
+					}
+				}}}
 		catch (Exception e) {
-			
-			String messsage=e.getMessage();
-			
-			messsage=e.getMessage();
-			
+
+			SuccessMessageObject messageObject= new SuccessMessageObject();
+			messageObject.setMessage("Error occured  Reason: "+e.getMessage());
+			uploadFileView.addObject("message",messageObject );
+			uploadFileView.setViewName("display");
+			return uploadFileView;
+
 			// TODO: handle exception
 		}
-		return null;
+		return uploadFileView;
+	
+		// TODO Auto-generated method stub
+		
 	}
 
-	  private boolean isCompleteURL(String url) {
-	        try {
-	            URL u = new URL(url); // this would check for the protocol
-	            u.toURI();// does the extra checking required for validation of URI
-	        } catch (URISyntaxException | MalformedURLException e) {
-	            // if exception then no url
-	            return false;
-	        }
-	        return true;
-	    }
-	
-	
+
 	/**
-     * Adds the label to a office document
-     *
-     * @param label and the file or file path
-     * @return the status success and model name
-     * @throws AppException  the app exception
-     * @throws TechException the tech exception
-     */
-	
-	
-	}
+	 * Adds the label to a office document
+	 *
+	 * @param label and the file or file path
+	 * @return the status success and model name
+	 * @throws AppException  the app exception
+	 * @throws TechException the tech exception
+	 */
+
+
+}

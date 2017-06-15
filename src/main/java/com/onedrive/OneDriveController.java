@@ -38,7 +38,6 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.internal.PackagePropertiesPart;
 import org.apache.xmlbeans.XmlException;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,14 +53,14 @@ import org.xml.sax.SAXException;
 import com.google.gson.JsonSyntaxException;
 
 @Controller
-public class HelloController {
+public class OneDriveController {
 
 
-	final static Logger logger = Logger.getLogger(HelloController.class);
+	final static Logger logger = Logger.getLogger(OneDriveController.class);
 
 	private UserService service;
 
-	public HelloController (UserService service) {
+	public OneDriveController (UserService service) {
 		this.service = service;
 	}
 
@@ -289,6 +288,8 @@ public class HelloController {
 
 		if(sizeOfInputStream>4194304){
 			return service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
+			
+		//	return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath,fileContent,nameOfFile);
 		}
 		
 		return service.uploadDocumentsToOneDrive(tokenAndPath,fileContent,nameOfFile);
@@ -339,7 +340,7 @@ String path= "C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf";
 		 Files.setAttribute(path1, "user:xdg.comment", ByteBuffer.wrap("Halllo".getBytes(StandardCharsets.UTF_8)), LinkOption.NOFOLLOW_LINKS);
 
 
-	 Attributes attributes = Attributes.loadUserAttributes(path1);
+	 
 
 		Transformer tf = TransformerFactory.newInstance().newTransformer();
 

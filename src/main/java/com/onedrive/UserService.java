@@ -38,4 +38,9 @@ public ModelAndView uploadLargeDocumentsToOneDrive(TokenAndPath tokenAndPath, In
 public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
 		throws ClientProtocolException, IOException, MessagingException;
 
+
+
+public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
+		throws ClientProtocolException, IOException, MessagingException;
+
 }
