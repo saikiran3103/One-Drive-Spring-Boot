@@ -21,7 +21,7 @@
     background-color: azure;
     color: red;
     font-size: larger;
-     padding-top: 119px;
+     padding-top: 50px;
      
       background: url(http://www.planwallpaper.com/static/images/background-wallpapers-2.jpg) no-repeat center center fixed; 
   webkit-background-size: cover;
@@ -59,7 +59,7 @@
     margin-top: 20px;">  
             Destination:
             <input type="text"  name="path"  id="path"/>
-            <br></p>
+            </p>
             <input type="submit"  style="
  
     
@@ -72,33 +72,41 @@
  font-size: 16px;
   cursor: pointer;
 "value="Upload" name="upload" id="upload" onclick="execute(document.getElementById('path').value);" />
-        </form>
+</form>
+
+  
+        
         
         </div>
         
        </div> 
-        <script type= text/javascript>
+       
+      <div  style="
+    font-size: 22pt;
+    font-family: monospace;
+    font-style: inherit;
+    font-feature-settings: initial;
+    color: #f44336;
+   width: 1550px;
+    margin-top: 85px;">  
+       
+       <form method="POST" action="uploadfolder" enctype="multipart/form-data" >
+Upload A local folder:  
+<input type="submit"  style="
+ 
+  
+    
+ margin-top: 15px;
+ color: rgb(255, 193, 7);
+ background: rgba(76, 175, 80, 0.97);
+ box-shadow: 0 0 20px black;
+ text-shadow: 0 0 13px black;
+ font-size: 16px;
+  cursor: pointer;
+"value="Upload Local Folder" name="upload" id="upload" onclick="execute(document.getElementById('path').value);" />
 
-function submitform(){
-	
-		    
-	
-	
-	document.getElementById("path").value = document.getElementById("text1").value;
-	/*get the token value from header*/
-	window.location.parseHash = function(){
-		   var hash = (this.hash ||'').replace(/^#/,'').split('&'),
-		       parsed = {};
-
-		   for(var i =0,el;i<hash.length; i++ ){
-		        el=hash[i].split('=')
-		        parsed[el[0]] = el[1];
-		   }
-		   return parsed;
-		};
-		
-		
-		 </script>
+</form>
+</div>       
     </body>
     
     

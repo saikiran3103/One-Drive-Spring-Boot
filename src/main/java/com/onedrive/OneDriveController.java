@@ -55,12 +55,11 @@ import com.google.gson.JsonSyntaxException;
 @Controller
 public class OneDriveController {
 
-
 	final static Logger logger = Logger.getLogger(OneDriveController.class);
 
 	private UserService service;
 
-	public OneDriveController (UserService service) {
+	public OneDriveController(UserService service) {
 		this.service = service;
 	}
 
@@ -90,15 +89,9 @@ public class OneDriveController {
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public ModelAndView connect(ModelMap model) {
 
-
-
-
 		ModelAndView model1 = new ModelAndView();
 		model1.setViewName("hello");
 		TokenAndPath tokenAndPath = new TokenAndPath();
-
-
-
 
 		String home = System.getProperty("user.home");
 
@@ -106,123 +99,128 @@ public class OneDriveController {
 
 		model1.addObject("token", tokenAndPath);
 		return model1;
-		//return "hello";
+		// return "hello";
 
 	}
-	@RequestMapping(value = "/token", method = RequestMethod.GET)
-	public String  authorizeAndGetUserToken() throws URISyntaxException {
 
+	@RequestMapping(value = "/token", method = RequestMethod.GET)
+	public String authorizeAndGetUserToken() throws URISyntaxException {
 
 		return service.authorizeAndGetUserToken();
 	}
 
-	@RequestMapping(value="onedrive/redirect",method = RequestMethod.GET )
-	public String  readToken( @RequestParam(value = "code", required = false) String code, HttpServletRequest request) throws URISyntaxException {
-		//			System.out.println(request.get;
-		//			String path =request.getPathInfo();
+	@RequestMapping(value = "onedrive/redirect", method = RequestMethod.GET)
+	public String readToken(@RequestParam(value = "code", required = false) String code, HttpServletRequest request)
+			throws URISyntaxException {
+		// System.out.println(request.get;
+		// String path =request.getPathInfo();
 		System.out.println(request.getParameter("param1"));
-		//			HttpSession session = request.getSession();
-		//			session.setAttribute("token", request.getParameter("param1"));
-		//			System.out.println("saiiiiii"+"   "+path);
+		// HttpSession session = request.getSession();
+		// session.setAttribute("token", request.getParameter("param1"));
+		// System.out.println("saiiiiii"+" "+path);
 
-		//			request.getParameterMap();
-		logger.info("Request"+request.toString());
+		// request.getParameterMap();
+		logger.info("Request" + request.toString());
 
 		return "welcome";
 	}
 
-	//		@RequestMapping(method = RequestMethod.POST, value="download")
-	//	    public ModelAndView   finaldownload(TokenAndPath tokenAndPath ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
-	//			return service.finaldownload(tokenAndPath);
-	//		}
+	// @RequestMapping(method = RequestMethod.POST, value="download")
+	// public ModelAndView finaldownload(TokenAndPath tokenAndPath ) throws
+	// URISyntaxException, IOException, JsonSyntaxException,
+	// IllegalStateException, InterruptedException, NumberFormatException,
+	// OpenXML4JException, XmlException {
+	// return service.finaldownload(tokenAndPath);
+	// }
 
-
-	/* final Method to download the files
+	/*
+	 * final Method to download the files
 	 * 
 	 * 
 	 * 
 	 */
-	@RequestMapping(method = RequestMethod.POST, value="onedrive/path1")
-	public ModelAndView getPersonalFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
-		//			System.out.println(request.getParameter("param1"));
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/path1")
+	public ModelAndView getPersonalFilesAndConvertToText(HttpServletRequest request)
+			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+			NumberFormatException, OpenXML4JException, XmlException {
+		// System.out.println(request.getParameter("param1"));
 		System.out.println(request.getParameter("param2"));
 
-
-		logger.info("HttpServletRequest"+request);
+		logger.info("HttpServletRequest" + request);
 		HttpSession session = request.getSession();
-		logger.info("Request"+request.toString());
+		logger.info("Request" + request.toString());
 		System.out.println(session.getAttribute("token"));
-		TokenAndPath tokenAndPath=new TokenAndPath();
-		tokenAndPath.setToken((String)session.getAttribute("token"));
+		TokenAndPath tokenAndPath = new TokenAndPath();
+		tokenAndPath.setToken((String) session.getAttribute("token"));
 		tokenAndPath.setPath(request.getParameter("param2"));
-		logger.info("accesstoken: "+session.getAttribute("token"));
+		logger.info("accesstoken: " + session.getAttribute("token"));
 		return service.personalItemsDownloadAndConvert(tokenAndPath);
 
 	}
 	// method to display the list of user names for the shared files
 
-	@RequestMapping(method = RequestMethod.POST, value="onedrive/shareditems")
-	public ModelAndView getSharedUsers(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
-		//			System.out.println(request.getParameter("param1"));
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/shareditems")
+	public ModelAndView getSharedUsers(HttpServletRequest request)
+			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+			NumberFormatException, OpenXML4JException, XmlException {
+		// System.out.println(request.getParameter("param1"));
 		System.out.println(request.getParameter("param2"));
 		HttpSession session = request.getSession();
 
-
 		session.setAttribute("sharedItemUrl", request.getParameter("param3"));
-		logger.info("Request"+request.toString());
-		logger.info("In onedrive/shareditems" );
+		logger.info("Request" + request.toString());
+		logger.info("In onedrive/shareditems");
 
 		System.out.println(session.getAttribute("token"));
-		TokenAndPath tokenAndPath=new TokenAndPath();
-		tokenAndPath.setToken((String)session.getAttribute("token"));
+		TokenAndPath tokenAndPath = new TokenAndPath();
+		tokenAndPath.setToken((String) session.getAttribute("token"));
 		tokenAndPath.setPath(request.getParameter("param3"));
-		logger.info("accesstoken: "+session.getAttribute("token"));
+		logger.info("accesstoken: " + session.getAttribute("token"));
 		return service.listSharedUsers(tokenAndPath);
 
 	}
 
-	// method to download and convert the shared files 
+	// method to download and convert the shared files
 
-	@RequestMapping(method = RequestMethod.POST, value="onedrive/downloadsharedfiles")
-	public ModelAndView getSharedFilesAndConvertToText(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
-		//			System.out.println(request.getParameter("param1"));
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/downloadsharedfiles")
+	public ModelAndView getSharedFilesAndConvertToText(HttpServletRequest request)
+			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+			NumberFormatException, OpenXML4JException, XmlException {
+		// System.out.println(request.getParameter("param1"));
 		System.out.println(request.getParameter("param2"));
 		HttpSession session = request.getSession();
 
-		logger.info("Request"+request.toString());
-		logger.info("In onedrive/shareditems" );
+		logger.info("Request" + request.toString());
+		logger.info("In onedrive/shareditems");
 		String driveId = request.getParameter("driveId");
-		String sharedItemUrl = 	(String)session.getAttribute("sharedItemUrl");
-		logger.info("Getting the files for the drive id  "+driveId );
+		String sharedItemUrl = (String) session.getAttribute("sharedItemUrl");
+		logger.info("Getting the files for the drive id  " + driveId);
 		System.out.println(session.getAttribute("token"));
-		TokenAndPath tokenAndPath=new TokenAndPath();
-		tokenAndPath.setToken((String)session.getAttribute("token"));
+		TokenAndPath tokenAndPath = new TokenAndPath();
+		tokenAndPath.setToken((String) session.getAttribute("token"));
 		tokenAndPath.setDriveId(driveId);
 
-		//take the path from the seesion stored in the previous call
+		// take the path from the seesion stored in the previous call
 		tokenAndPath.setPath(sharedItemUrl);
 
-
-
-
-		logger.info("accesstoken: "+session.getAttribute("token"));
+		logger.info("accesstoken: " + session.getAttribute("token"));
 		return service.sharedItemsDownloadAndConvert(tokenAndPath);
 
 	}
 
-
-	//method to redirect to hide the token
-	@RequestMapping(method = RequestMethod.POST, value="onedrive/path")
-	public String getTokenAndPath1(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
+	// method to redirect to hide the token
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/path")
+	public String getTokenAndPath1(HttpServletRequest request)
+			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+			NumberFormatException, OpenXML4JException, XmlException {
 		HttpSession session = request.getSession();
 		session.setAttribute("token", request.getParameter("param1"));
 		System.out.println(request.getParameter("param1"));
 		System.out.println(session.getAttribute("token"));
 		logger.info("sai is testing logs");
 		return "test1";
-		//return "displayPath";
+		// return "displayPath";
 	}
-
 
 	@RequestMapping(value = "onedrive/upload", method = RequestMethod.GET)
 	public ModelAndView goToUploadJsp(HttpServletRequest request) {
@@ -233,76 +231,68 @@ public class OneDriveController {
 
 	}
 
-	//method to upload files to one drive
-	@RequestMapping(method = RequestMethod.POST, value="onedrive/uploadfiles")
-	public ModelAndView uploadDocumentsToOneDrive(HttpServletRequest request ) throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, 
-	OpenXML4JException, XmlException, ServletException, FileUploadException, MessagingException {
+	// method to upload files to one drive
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/uploadfiles")
+	public ModelAndView uploadDocumentsToOneDrive(HttpServletRequest request) throws URISyntaxException, IOException,
+			JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException,
+			XmlException, ServletException, FileUploadException, MessagingException {
 		HttpSession session = request.getSession();
-		//	 String driveId = request.getParameter("driveId");
-
+		// String driveId = request.getParameter("driveId");
 
 		String driveId = "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
 
-
-		String sharedItemUrl = 	(String)session.getAttribute("sharedItemUrl");
-
-		logger.info("Getting the files for the drive id  "+driveId );
+		logger.info("Getting the files for the drive id  " + driveId);
 
 		System.out.println(session.getAttribute("token"));
 
-		TokenAndPath tokenAndPath=new TokenAndPath();
+		TokenAndPath tokenAndPath = new TokenAndPath();
 
-		tokenAndPath.setToken((String)session.getAttribute("token"));
+		tokenAndPath.setToken((String) session.getAttribute("token"));
 
 		tokenAndPath.setDriveId(driveId);
-		
-		
 
 		final Part filePart = request.getPart("file");
-	int fileSize=	(int)filePart.getSize();
-	
-	tokenAndPath.setFileSize(fileSize);
+		int fileSize = (int) filePart.getSize();
 
+		tokenAndPath.setFileSize(fileSize);
 
-		String path=request.getParameter("path");
+		String path = request.getParameter("path");
 
 		tokenAndPath.setPath(path);
 
-		logger.info(path+"path");
+		logger.info(path + "path");
 
-		logger.info(filePart.getSubmittedFileName().getBytes()+"filePart.getName()");
-		InputStream fileContent=	(FileInputStream) filePart.getInputStream();
+		logger.info(filePart.getSubmittedFileName().getBytes() + "filePart.getName()");
+		InputStream fileContent = (FileInputStream) filePart.getInputStream();
 
+		String nameOfFile = filePart.getSubmittedFileName();
 
-
-		String nameOfFile=	filePart.getSubmittedFileName();
-
-		byte[] fileArray= filePart.getSubmittedFileName().getBytes();
+		byte[] fileArray = filePart.getSubmittedFileName().getBytes();
 
 		logger.info("inside upload files");
-		
-		long sizeOfInputStream = (long)fileContent.available();
 
-		long fourMBbsize= 4194304;
+		long sizeOfInputStream = (long) fileContent.available();
+
+		long fourMBbsize = 4194304;
 		int count = 0;
 
-		if(sizeOfInputStream>4194304){
-		//	return service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
-			
-		return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath,fileContent,nameOfFile);
+		if (sizeOfInputStream > 4194304) {
+			// return
+			// service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
+
+			return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath, fileContent, nameOfFile);
 		}
-		
-		return service.uploadDocumentsToOneDrive(tokenAndPath,fileContent,nameOfFile);
-		//return "displayPath";
+
+		return service.uploadDocumentsToOneDrive(tokenAndPath, fileContent, nameOfFile);
+		// return "displayPath";
 	}
 
-	
-	
-	//method to add comment to a file 
-	@RequestMapping(method = RequestMethod.GET, value="onedrive/comment")
-	public ModelAndView addComment() throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, 
-	OpenXML4JException, XmlException, ServletException, FileUploadException, TransformerFactoryConfigurationError, ParserConfigurationException, SAXException, TransformerException {
-
+	// method to add comment to a file
+	@RequestMapping(method = RequestMethod.GET, value = "onedrive/comment")
+	public ModelAndView addComment()
+			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+			NumberFormatException, OpenXML4JException, XmlException, ServletException, FileUploadException,
+			TransformerFactoryConfigurationError, ParserConfigurationException, SAXException, TransformerException {
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -310,37 +300,33 @@ public class OneDriveController {
 
 		DocumentBuilder db = dbf.newDocumentBuilder();
 
-String path= "C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf";
+		String path = "C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf";
 
-		Document doc = db.parse(new FileInputStream(new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf")));
-
-
+		Document doc = db
+				.parse(new FileInputStream(new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf")));
 
 		Element element = doc.getDocumentElement();
 
 		Comment comment = doc.createComment("This is a comment");
 		element.getParentNode().insertBefore(comment, element);
-		
+
 		Path path1;
-		
-		
-		File myFile=new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/roles.docx");
+
+		File myFile = new File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/roles.docx");
 		OPCPackage pkg = OPCPackage.open(myFile);
-		POIXMLProperties poixmlProperties= new POIXMLProperties(pkg);
-		
+		POIXMLProperties poixmlProperties = new POIXMLProperties(pkg);
+
 		PackagePropertiesPart ppropsPart = poixmlProperties.getCoreProperties().getUnderlyingProperties();
 		ppropsPart.setTitleProperty("changed by admin ");
-		
+
 		ppropsPart.getContentTypeDetails();
-		
+
 		URL resource = getClass().getResource("testfile.txt");
-		
-		 path1 = Paths.get(resource.toURI());
 
-		 Files.setAttribute(path1, "user:xdg.comment", ByteBuffer.wrap("Halllo".getBytes(StandardCharsets.UTF_8)), LinkOption.NOFOLLOW_LINKS);
+		path1 = Paths.get(resource.toURI());
 
-
-	 
+		Files.setAttribute(path1, "user:xdg.comment", ByteBuffer.wrap("Halllo".getBytes(StandardCharsets.UTF_8)),
+				LinkOption.NOFOLLOW_LINKS);
 
 		Transformer tf = TransformerFactory.newInstance().newTransformer();
 
@@ -354,17 +340,27 @@ String path= "C:/Users/sai.kiran.akkireddy/Downloads/testDownload/pdf.pdf";
 
 		System.out.println(out.toString());
 
-
-
-
-
-
-
-
 		return null;
 
 	}
 
+	/*
+	 * Method to upload a folder to one drive
+	 * 
+	 * Takes the input as the path of the folder
+	 * 
+	 * Uploads to one drive
+	 * 
+	 */
 
+	@RequestMapping(method = RequestMethod.GET, value = "onedrive/uploadfolder")
+	public ModelAndView uploadFolderToOneDrive(HttpServletRequest request)
+			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+			NumberFormatException, OpenXML4JException, XmlException, ServletException, FileUploadException,
+			TransformerFactoryConfigurationError, ParserConfigurationException, SAXException, TransformerException {
+
+		HttpSession session = request.getSession();
+		return null;
+	}
 
 }

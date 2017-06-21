@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import javax.mail.MessagingException;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -42,5 +43,15 @@ public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath,
 
 public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
 		throws ClientProtocolException, IOException, MessagingException;
+
+
+
+
+
+
+
+
+public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
+		throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException;
 
 }

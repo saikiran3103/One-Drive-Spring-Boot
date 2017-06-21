@@ -52,7 +52,7 @@ public class ParallelConverter implements Runnable {
 	private static void officeFilesConverter(File officefile, String originalFolderName) {
 
 		try {
-			officefile.getAbsolutePath();
+			
 			System.out.println("Reading file " + officefile.getName());
 			officefile.getName();
 			logger.info("converting the file _" + officefile.getAbsolutePath());
@@ -65,7 +65,7 @@ public class ParallelConverter implements Runnable {
 
 			// File f = new File(officefile.getPath());
 			String path = officefile.getParent();
-			String textFolderName = path.substring(path.lastIndexOf("\\") + 1, path.length());
+			//String textFolderName = path.substring(path.lastIndexOf("\\") + 1, path.length());
 
 			File textdirectory = new File(officefile.getParent());
 			textdirectory.mkdir();
