@@ -33,6 +33,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileSystemView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -878,6 +879,7 @@ public class UserServiceImpl implements UserService {
 
 		String commonUrl = "https://graph.microsoft.com/v1.0/drives/";
 
+		//path to which the file should be uploaded
 		String base_path = tokenAndPath.getPath();// replaceAll("%20", " ");
 
 		// gets the start index after the documents path
@@ -1479,31 +1481,33 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
-			String nameOfFile) throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException,
+	public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath)
+			throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 
-		String accessToken= tokenAndPath.getToken();
-		
-		
+		String accessToken = tokenAndPath.getToken();
+
 		// creating a folder choser from the local drive
 
-		JFileChooser chooser = new JFileChooser();
-
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-		chooser.updateUI();
-		chooser.setCurrentDirectory(new java.io.File("."));
-		chooser.setDialogTitle("choosertitle");
+		JFileChooser chooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+		 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		 chooser.updateUI();
+		chooser.setDialogTitle("Double Click to go inside ,click save to select folder: ");
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.showOpenDialog(null);
 
-		// Confirm the option from the user
+		int returnValue = chooser.showSaveDialog(null);
 
-		int result = JOptionPane.showConfirmDialog(null, "confirm the folder selected");
+		// Confirm dialog box the option from the user
 
-		if (result == JOptionPane.YES_OPTION) {
+		int result = JOptionPane.showConfirmDialog(null, "confirm "+chooser.getSelectedFile());
+		
+		while (result == JOptionPane.NO_OPTION) {
+			returnValue = chooser.showSaveDialog(null);
+		
+			result = JOptionPane.showConfirmDialog(null, "confirm "+chooser.getSelectedFile());
+		}
+
+		if ((returnValue == JFileChooser.APPROVE_OPTION )&& (result == JOptionPane.YES_OPTION)) {
 
 			String pathGiven = chooser.getSelectedFile().toString();
 
@@ -1515,11 +1519,17 @@ public class UserServiceImpl implements UserService {
 				UploadExecutor.execute(FolderUploader);
 			}
 
+			UploadExecutor.shutdown();
+			try {
+				UploadExecutor.awaitTermination(1800, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
 
-		if (result == JOptionPane.NO_OPTION) {
-
-		}
+		
 
 		if (result == JOptionPane.CANCEL_OPTION) {
 

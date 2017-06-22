@@ -16,42 +16,35 @@ import org.springframework.web.servlet.ModelAndView;
 import com.google.gson.JsonSyntaxException;
 
 public interface UserService {
-	
+
 	public String authorizeAndGetUserToken() throws URISyntaxException;
 
-	public ModelAndView  personalItemsDownloadAndConvert(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
+	public ModelAndView personalItemsDownloadAndConvert(TokenAndPath tokenAndPath)
+			throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException,
+			OpenXML4JException, XmlException;
 
-	public ModelAndView  sharedItemsDownloadAndConvert(TokenAndPath tokenAndPath) throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
+	public ModelAndView sharedItemsDownloadAndConvert(TokenAndPath tokenAndPath)
+			throws IOException, IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException,
+			OpenXML4JException, XmlException;
 
-	
-
-public	ModelAndView listSharedUsers(TokenAndPath tokenAndPath) throws IOException, IllegalStateException,
+	public ModelAndView listSharedUsers(TokenAndPath tokenAndPath) throws IOException, IllegalStateException,
 			JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
 
-public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
-		throws ClientProtocolException, IOException, MessagingException;
+	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
+			String nameOfFile) throws ClientProtocolException, IOException, MessagingException;
 
+	public ModelAndView uploadLargeDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
+			String nameOfFile) throws ClientProtocolException, IOException, MessagingException;
 
-public ModelAndView uploadLargeDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
-		throws ClientProtocolException, IOException, MessagingException;
+	public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath, InputStream fileInputStream,
+			String nameOfFile) throws ClientProtocolException, IOException, MessagingException;
 
+	public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath,
+			InputStream fileInputStream, String nameOfFile)
+			throws ClientProtocolException, IOException, MessagingException;
 
-public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
-		throws ClientProtocolException, IOException, MessagingException;
-
-
-
-public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
-		throws ClientProtocolException, IOException, MessagingException;
-
-
-
-
-
-
-
-
-public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream, String nameOfFile) 
-		throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException;
+	public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath)
+			throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException,
+			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException;
 
 }

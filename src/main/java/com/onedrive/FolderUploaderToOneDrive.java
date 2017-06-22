@@ -22,14 +22,12 @@ import com.squareup.okhttp.Response;
 public class FolderUploaderToOneDrive implements Runnable {
 
 	final static Logger logger = Logger.getLogger(FolderUploaderToOneDrive.class);
-	private UploadSession uploadSession;
+
 	private boolean canceled = false;
 	private boolean finished = false;
 	private String token;
 	private File file;
 	private static final int chunkSize = 320 * 1024 * 30;
-	private FileInputStream fileInputStream;
-	private RandomAccessFile randFile;
 
 	public FolderUploaderToOneDrive(File file, String token) {
 		this.token = token;
@@ -41,19 +39,76 @@ public class FolderUploaderToOneDrive implements Runnable {
 
 		byte[] bytes;
 
-		randFile = null;
-
 		try {
-			fileInputStream = new FileInputStream(file);
+			FileInputStream fileInputStream = new FileInputStream(file);
 
 			long fourMBbsize = 4194304;
 
-			long sizeOfFile = randFile.length();
+			long sizeOfFile = file.length();
 
-			if (sizeOfFile > fourMBbsize) {
-			} else {
+			if (sizeOfFile < fourMBbsize) {
 
-				String access_token = token;
+				String driveId = "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+
+				String commonUrl = "https://graph.microsoft.com/v1.0/drives/";
+
+				String base_path = "https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test";// replaceAll("%20",
+																														// "
+				String nameOfFile = file.getName(); // ");
+
+				// gets the start index after the documents path
+				int indexAfterDocuments = base_path.lastIndexOf("Documents") + 10;
+
+				String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
+
+				String contentStringAppender = ":/content";
+
+				String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
+				String uploadUrl = commonUrl + driveId + "/root:/" + folderPathAfterdocuments + "/"
+						+ nameOfFileFormatted + contentStringAppender;
+
+				bytes = new byte[(int) file.length()];
+
+				PreparedRequest uploadChunk = new PreparedRequest(uploadUrl, PreparedRequestMethod.PUT);
+
+				fileInputStream.read(bytes);
+				uploadChunk.setBody(bytes);
+
+				RequestBody body = null;
+
+				if (uploadChunk.getBody() != null) {
+					body = RequestBody.create(null, uploadChunk.getBody());
+				}
+
+				String url = uploadChunk.getPath();
+
+				logger.debug(String.format("making request to %s", url));
+
+				Request.Builder builder = new Request.Builder().method(uploadChunk.getMethod(), body).url(url);
+
+				builder.header("Authorization", "bearer " + token);
+
+				Request request = builder.build();
+				OkHttpClient client = new OkHttpClient();
+				client.setConnectTimeout(60, TimeUnit.SECONDS); // connect
+																// timeout
+				client.setReadTimeout(60, TimeUnit.SECONDS);
+				Response response = client.newCall(request).execute();
+
+				ConcreteOneResponse concreteOneResponse1 = new ConcreteOneResponse(response);
+
+				if (concreteOneResponse1.wasSuccess()) {
+					if (concreteOneResponse1.getStatusCode() == 200 || concreteOneResponse1.getStatusCode() == 201) {
+						// if last chunk upload was successful end the
+
+						String resp = concreteOneResponse1.getBodyAsString();
+
+					}
+
+				}
+			} 
+		//	For files greater than 4mb , create a session and upload by fragments
+			else {
 
 				String nameOfFile = file.getName();
 
@@ -87,7 +142,7 @@ public class FolderUploaderToOneDrive implements Runnable {
 				String jsonBody = gson.toJson(uploadBody);
 
 				httpRequest.addHeader("Content-Type", "application/json");
-				httpRequest.addHeader("Authorization", "Bearer " + access_token);
+				httpRequest.addHeader("Authorization", "Bearer " + token);
 
 				logger.info(httpRequest.getMethod());
 
@@ -174,7 +229,7 @@ public class FolderUploaderToOneDrive implements Runnable {
 					}
 
 					// Add auth permanently to header with redirection
-					builder.header("Authorization", "bearer " + access_token);
+					builder.header("Authorization", "bearer " + token);
 					Request request = builder.build();
 					OkHttpClient client = new OkHttpClient();
 					client.setConnectTimeout(60, TimeUnit.SECONDS); // connect
@@ -192,7 +247,8 @@ public class FolderUploaderToOneDrive implements Runnable {
 
 						} else {
 							// just continue
-							uploadSession = gson.fromJson(concreteOneResponse1.getBodyAsString(), UploadSession.class);
+							UploadSession uploadSession = gson.fromJson(concreteOneResponse1.getBodyAsString(),
+									UploadSession.class);
 
 							nextRanges = uploadSession.getNextRange();
 

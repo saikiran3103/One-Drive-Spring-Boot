@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -353,14 +354,29 @@ public class OneDriveController {
 	 * 
 	 */
 
-	@RequestMapping(method = RequestMethod.GET, value = "onedrive/uploadfolder")
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/uploadfolder")
 	public ModelAndView uploadFolderToOneDrive(HttpServletRequest request)
 			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
 			NumberFormatException, OpenXML4JException, XmlException, ServletException, FileUploadException,
-			TransformerFactoryConfigurationError, ParserConfigurationException, SAXException, TransformerException {
+			TransformerFactoryConfigurationError, ParserConfigurationException, SAXException, TransformerException, ClassNotFoundException, InstantiationException, IllegalAccessException, MessagingException, UnsupportedLookAndFeelException {
 
 		HttpSession session = request.getSession();
-		return null;
+		
+		String driveId = "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+
+		logger.info("Getting the files for the drive id  " + driveId);
+
+		System.out.println(session.getAttribute("token"));
+
+		TokenAndPath tokenAndPath = new TokenAndPath();
+
+		tokenAndPath.setToken((String) session.getAttribute("token"));
+
+		tokenAndPath.setDriveId(driveId);
+		
+		return service.uploadFolderToOneDrive(tokenAndPath);
+		
+	//	return null;
 	}
 
 }
