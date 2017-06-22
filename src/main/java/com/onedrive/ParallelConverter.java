@@ -33,6 +33,8 @@ public class ParallelConverter implements Runnable {
 
 	final static Logger logger = Logger.getLogger(ParallelConverter.class);
 
+	StringBuffer statusOfAllFiles= null;
+	
 	private String home = System.getProperty("user.home");
 	private File officefile;
 

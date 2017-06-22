@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 import java.net.URL;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
@@ -19,14 +20,19 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
-public class FolderUploaderToOneDrive implements Runnable {
+public class FolderUploaderToOneDrive implements Callable<String> {
 
 	final static Logger logger = Logger.getLogger(FolderUploaderToOneDrive.class);
 
+	private String statusOfFileUpload = null;
 	private boolean canceled = false;
 	private boolean finished = false;
 	private String token;
 	private File file;
+	private int successCounter = 0;
+	private int failureCounter = 0;
+
+	private static final String base_path = "https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test";
 	private static final int chunkSize = 320 * 1024 * 30;
 
 	public FolderUploaderToOneDrive(File file, String token) {
@@ -35,7 +41,7 @@ public class FolderUploaderToOneDrive implements Runnable {
 	}
 
 	@Override
-	public void run() {
+	public String call() {
 
 		byte[] bytes;
 
@@ -52,8 +58,7 @@ public class FolderUploaderToOneDrive implements Runnable {
 
 				String commonUrl = "https://graph.microsoft.com/v1.0/drives/";
 
-				String base_path = "https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test";// replaceAll("%20",
-																														// "
+				// "
 				String nameOfFile = file.getName(); // ");
 
 				// gets the start index after the documents path
@@ -101,13 +106,22 @@ public class FolderUploaderToOneDrive implements Runnable {
 					if (concreteOneResponse1.getStatusCode() == 200 || concreteOneResponse1.getStatusCode() == 201) {
 						// if last chunk upload was successful end the
 
-						String resp = concreteOneResponse1.getBodyAsString();
-
+						logger.info("Uploaded  successfully " + file.getName() + " to one drive");
+						statusOfFileUpload = "Succesfully Uploaded " + file.getAbsolutePath();
 					}
 
+				} else {
+					Gson gson = new Gson();
+					Error error = gson.fromJson(response.body().toString(), Error.class);
+
+					logger.info("File " + file + "is not uploaded because of " + error.getError().getMessage());
+
+					System.err.println("File " + file + "is not uploaded because of " + error.getError().getMessage());
+
 				}
-			} 
-		//	For files greater than 4mb , create a session and upload by fragments
+			}
+			// For files greater than 4mb , create a session and upload by
+			// fragments
 			else {
 
 				String nameOfFile = file.getName();
@@ -117,7 +131,7 @@ public class FolderUploaderToOneDrive implements Runnable {
 
 				String commonUrl = "https://graph.microsoft.com/v1.0/drives/";
 
-				String base_path = file.getPath();// replaceAll("%20", " ");
+				// String base_path = file.getPath();// replaceAll("%20", " ");
 
 				// gets the start index after the documents path
 				int indexAfterDocuments = base_path.lastIndexOf("Documents") + 10;
@@ -237,17 +251,18 @@ public class FolderUploaderToOneDrive implements Runnable {
 					client.setReadTimeout(60, TimeUnit.SECONDS);
 					Response response = client.newCall(request).execute();
 
-					ConcreteOneResponse concreteOneResponse1 = new ConcreteOneResponse(response);
-					if (concreteOneResponse1.wasSuccess()) {
-						if (concreteOneResponse1.getStatusCode() == 200
-								|| concreteOneResponse1.getStatusCode() == 201) {
+					ConcreteOneResponse uploadOneDriveResponse = new ConcreteOneResponse(response);
+					if (uploadOneDriveResponse.wasSuccess()) {
+						if (uploadOneDriveResponse.getStatusCode() == 200
+								|| uploadOneDriveResponse.getStatusCode() == 201) {
 							// if last chunk upload was successful end the
 							finished = true;
-							String resp = concreteOneResponse1.getBodyAsString();
+							logger.info("successfully uploaded all the fragments of " + file.getAbsolutePath());
+							statusOfFileUpload = "Succesfully Uploaded " + file.getAbsolutePath();
 
 						} else {
 							// just continue
-							UploadSession uploadSession = gson.fromJson(concreteOneResponse1.getBodyAsString(),
+							UploadSession uploadSession = gson.fromJson(uploadOneDriveResponse.getBodyAsString(),
 									UploadSession.class);
 
 							nextRanges = uploadSession.getNextRange();
@@ -259,7 +274,13 @@ public class FolderUploaderToOneDrive implements Runnable {
 			}
 		} catch (Exception ex) {
 			logger.error("ex.printStackTrace()", ex);
+			logger.error("Error occured while uploading file " + file.getAbsolutePath());
+
+			statusOfFileUpload = "Upload Error for " + file.getAbsolutePath();
+			System.err.println(ex.getMessage());
+			return statusOfFileUpload;
 		}
+		return statusOfFileUpload;
 	}
 
 }

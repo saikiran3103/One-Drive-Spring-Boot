@@ -17,13 +17,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -879,7 +883,7 @@ public class UserServiceImpl implements UserService {
 
 		String commonUrl = "https://graph.microsoft.com/v1.0/drives/";
 
-		//path to which the file should be uploaded
+		// path to which the file should be uploaded
 		String base_path = tokenAndPath.getPath();// replaceAll("%20", " ");
 
 		// gets the start index after the documents path
@@ -1331,139 +1335,134 @@ public class UserServiceImpl implements UserService {
 
 			HttpResponse concreteOneResponse = httpClient.execute(httpRequest);
 
-			final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) concreteOneResponse.getEntity();
+			final Integer httpStatusCode = concreteOneResponse.getStatusLine().getStatusCode();
 
-			final String responseString = EntityUtils.toString((org.apache.http.HttpEntity) entity, "UTF-8");
+			if ((concreteOneResponse != null) && (concreteOneResponse.getStatusLine() != null)
+					&& (httpStatusCode.equals(HttpStatus.SC_OK))) {
 
-			EntityUtils.consume(entity);
+				final org.apache.http.HttpEntity entity = (org.apache.http.HttpEntity) concreteOneResponse.getEntity();
 
-			logger.info(httpRequest.toString());
+				final String responseString = EntityUtils.toString((org.apache.http.HttpEntity) entity, "UTF-8");
 
-			System.out.println(responseString);
+				EntityUtils.consume(entity);
 
-			logger.info(responseString);
+				logger.info(httpRequest.toString());
 
-			httpClient.getConnectionManager().shutdown();
+				System.out.println(responseString);
 
-			UploadSessionCreateResponse uploadSessionCreateResponse = gson.fromJson(responseString,
-					UploadSessionCreateResponse.class);
+				logger.info(responseString);
 
-			String uploadUrl = uploadSessionCreateResponse.getUploadUrl();
+				httpClient.getConnectionManager().shutdown();
 
-			URL uploadURL = new URL(uploadUrl.toString());
+				UploadSessionCreateResponse uploadSessionCreateResponse = gson.fromJson(responseString,
+						UploadSessionCreateResponse.class);
 
-			// ("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/largepdf.pdf");Sample
-			// large docx
+				String uploadUrl = uploadSessionCreateResponse.getUploadUrl();
 
-			// C:/Users/sai.kiran.akkireddy/Downloads/testDownload/oversize_pdf_test_0.pdf
+				URL uploadURL = new URL(uploadUrl.toString());
 
-			// File fileToUpload =new
-			// File("C:/Users/sai.kiran.akkireddy/Downloads/testDownload/large_docx.docx");
+				int numToCalculateEndrange = 1;
+				int endRange = 0;
+				int content_length = 0;
+				long nextRanges = 0L;
 
-			// randFile = new RandomAccessFile(fileToUpload, "r");
+				long fileInputStreamIntilialSize = fileInputStream.available();
+				finished = false;
+				canceled = false;
+				while (!canceled && !finished) {
 
-			int numToCalculateEndrange = 1;
-			int endRange = 0;
-			int content_length = 0;
-			long nextRanges = 0L;
+					long currFirstByteStream = 0L;
 
-			long fileInputStreamIntilialSize = fileInputStream.available();
-			finished = false;
-			canceled = false;
-			while (!canceled && !finished) {
+					PreparedRequest uploadChunk = new PreparedRequest(uploadUrl, PreparedRequestMethod.PUT);
 
-				long currFirstByteStream = 0L;
+					if (nextRanges + chunkSize < fileInputStream.available()) {
+						bytes = new byte[chunkSize];
+						content_length = chunkSize;
+						endRange = numToCalculateEndrange * chunkSize - 1;
+						numToCalculateEndrange++;
+					}
 
-				PreparedRequest uploadChunk = new PreparedRequest(uploadUrl, PreparedRequestMethod.PUT);
-				// if (currFirstByte + chunkSize < randFile.length()) {
-				// bytes = new byte[chunkSize];
-				//
-				// }
-				if (nextRanges + chunkSize < fileInputStream.available()) {
-					bytes = new byte[chunkSize];
-					content_length = chunkSize;
-					endRange = numToCalculateEndrange * chunkSize - 1;
-					numToCalculateEndrange++;
-				}
-				// else {
-				// // optimistic cast, assuming the last bit of the file is
-				// // never bigger than MAXINT
-				// bytes = new byte[(int) (randFile.length() -
-				// randFile.getFilePointer())];
-				// }
+					else {
+						// optimistic cast, assuming the last bit of the file is
+						// never bigger than MAXINT
+						bytes = new byte[(int) (fileInputStream.available())];
+						content_length = (int) fileInputStream.available();
+						endRange = (numToCalculateEndrange - 1) * chunkSize + content_length - 1;
+					}
 
-				else {
-					// optimistic cast, assuming the last bit of the file is
-					// never bigger than MAXINT
-					bytes = new byte[(int) (fileInputStream.available())];
-					content_length = (int) fileInputStream.available();
-					endRange = (numToCalculateEndrange - 1) * chunkSize + content_length - 1;
-				}
+					fileInputStream.read(bytes);
+					uploadChunk.setBody(bytes);
 
-				// long start = randFile.getFilePointer();
-				// randFile.readFully(bytes);
-				fileInputStream.read(bytes);
-				uploadChunk.setBody(bytes);
+					String Content_length = Integer.toString(content_length);
+					uploadChunk.addHeader("Content-Length", (content_length) + "");
 
-				String Content_length = Integer.toString(content_length);
-				uploadChunk.addHeader("Content-Length", (content_length) + "");
+					uploadChunk.addHeader("Content-Range",
+							String.format("bytes %s-%s/%s", nextRanges, endRange, fileInputStreamIntilialSize));
 
-				// uploadChunk.addHeader("Content-Length",
-				// (randFile.getFilePointer() - start) + "");
-				uploadChunk.addHeader("Content-Range",
-						String.format("bytes %s-%s/%s", nextRanges, endRange, fileInputStreamIntilialSize));
+					logger.info("Uploading chunk {} - {}" + nextRanges + "-" + endRange);
+					String url;
+					RequestBody body = null;
 
-				logger.info("Uploading chunk {} - {}" + nextRanges + "-" + endRange);
-				String url;
-				RequestBody body = null;
+					if (uploadChunk.getBody() != null) {
+						body = RequestBody.create(null, uploadChunk.getBody());
+					}
 
-				if (uploadChunk.getBody() != null) {
-					body = RequestBody.create(null, uploadChunk.getBody());
-				}
-
-				if (isCompleteURL(uploadChunk.getPath())) {
-					url = uploadChunk.getPath();
-				} else {
-					url = String.format("%s%s?access_token=%s", this.baseUrl, uploadChunk.getPath(), access_token);
-				}
-
-				logger.debug(String.format("making request to %s", url));
-
-				Request.Builder builder = new Request.Builder().method(uploadChunk.getMethod(), body).url(url);
-
-				for (String key : uploadChunk.getHeader().keySet()) {
-					builder.addHeader(key, uploadChunk.getHeader().get(key));
-				}
-
-				// Add auth permanently to header with redirection
-				builder.header("Authorization", "bearer " + access_token);
-				Request request = builder.build();
-				OkHttpClient client = new OkHttpClient();
-				client.setConnectTimeout(60, TimeUnit.SECONDS); // connect
-																// timeout
-				client.setReadTimeout(60, TimeUnit.SECONDS);
-				Response response = client.newCall(request).execute();
-
-				ConcreteOneResponse concreteOneResponse1 = new ConcreteOneResponse(response);
-				if (concreteOneResponse1.wasSuccess()) {
-					if (concreteOneResponse1.getStatusCode() == 200 || concreteOneResponse1.getStatusCode() == 201) {
-						// if last chunk upload was successful end the
-						finished = true;
-						String resp = concreteOneResponse1.getBodyAsString();
-						SuccessMessageObject messageObject = new SuccessMessageObject();
-						messageObject.setMessage("successfully uploaded " + nameOfFile + " to users shared drive");
-						uploadFileView.addObject("message", messageObject);
-						uploadFileView.setViewName("display");
+					if (isCompleteURL(uploadChunk.getPath())) {
+						url = uploadChunk.getPath();
 					} else {
-						// just continue
-						uploadSession = gson.fromJson(concreteOneResponse1.getBodyAsString(), UploadSession.class);
+						url = String.format("%s%s?access_token=%s", this.baseUrl, uploadChunk.getPath(), access_token);
+					}
 
-						nextRanges = uploadSession.getNextRange();
-						// randFile.seek(((com.onedrive.UploadSession)
-						// uploadSession).getNextRange());
+					logger.debug(String.format("making request to %s", url));
+
+					Request.Builder builder = new Request.Builder().method(uploadChunk.getMethod(), body).url(url);
+
+					for (String key : uploadChunk.getHeader().keySet()) {
+						builder.addHeader(key, uploadChunk.getHeader().get(key));
+					}
+
+					// Add auth permanently to header with redirection
+					builder.header("Authorization", "bearer " + access_token);
+					Request request = builder.build();
+					OkHttpClient client = new OkHttpClient();
+					client.setConnectTimeout(60, TimeUnit.SECONDS); // connect
+																	// timeout
+					client.setReadTimeout(60, TimeUnit.SECONDS);
+					Response response = client.newCall(request).execute();
+
+					ConcreteOneResponse concreteOneResponse1 = new ConcreteOneResponse(response);
+					if (concreteOneResponse1.wasSuccess()) {
+						//if request is successful a 202 accepted message is received 
+						if (concreteOneResponse1.getStatusCode() == HttpStatus.SC_CREATED
+								|| concreteOneResponse1.getStatusCode() == HttpStatus.SC_OK) {
+							// if last chunk upload was successful end the
+							finished = true;
+							String resp = concreteOneResponse1.getBodyAsString();
+							SuccessMessageObject messageObject = new SuccessMessageObject();
+							messageObject.setMessage("successfully uploaded " + nameOfFile + " to users shared drive");
+							uploadFileView.addObject("message", messageObject);
+							uploadFileView.setViewName("display");
+						} else {
+							// just continue until we get created status 
+							uploadSession = gson.fromJson(concreteOneResponse1.getBodyAsString(), UploadSession.class);
+
+							nextRanges = uploadSession.getNextRange();
+
+						}
 					}
 				}
+				return uploadFileView;
+			} else {
+
+				SuccessMessageObject messageObject = new SuccessMessageObject();
+				// write the proper message
+				messageObject.setMessage("Error occured  while uploading file " + nameOfFile+"<br>"+concreteOneResponse.getStatusLine()+"</br>");
+				uploadFileView.addObject("message", messageObject);
+				uploadFileView.setViewName("display");
+				return uploadFileView;
+
 			}
+
 		} catch (Exception e) {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
@@ -1474,7 +1473,6 @@ public class UserServiceImpl implements UserService {
 
 			// TODO: handle exception
 		}
-		return uploadFileView;
 
 		// TODO Auto-generated method stub
 
@@ -1484,14 +1482,21 @@ public class UserServiceImpl implements UserService {
 	public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath)
 			throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
-
+		ModelAndView uploadFileView = new ModelAndView();
+		
+		StringBuffer statusOfAllThreads = new StringBuffer();
+		
+		try{
+			
+			
+			
 		String accessToken = tokenAndPath.getToken();
 
 		// creating a folder choser from the local drive
 
 		JFileChooser chooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-		 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		 chooser.updateUI();
+		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		chooser.updateUI();
 		chooser.setDialogTitle("Double Click to go inside ,click save to select folder: ");
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
@@ -1499,24 +1504,27 @@ public class UserServiceImpl implements UserService {
 
 		// Confirm dialog box the option from the user
 
-		int result = JOptionPane.showConfirmDialog(null, "confirm "+chooser.getSelectedFile());
-		
+		int result = JOptionPane.showConfirmDialog(null, "confirm " + chooser.getSelectedFile());
+
 		while (result == JOptionPane.NO_OPTION) {
 			returnValue = chooser.showSaveDialog(null);
-		
-			result = JOptionPane.showConfirmDialog(null, "confirm "+chooser.getSelectedFile());
+
+			result = JOptionPane.showConfirmDialog(null, "confirm " + chooser.getSelectedFile());
 		}
 
-		if ((returnValue == JFileChooser.APPROVE_OPTION )&& (result == JOptionPane.YES_OPTION)) {
+		if ((returnValue == JFileChooser.APPROVE_OPTION) && (result == JOptionPane.YES_OPTION)) {
 
 			String pathGiven = chooser.getSelectedFile().toString();
 
 			List<File> filesInFolder = Files.walk(Paths.get(pathGiven)).filter(Files::isRegularFile).map(Path::toFile)
 					.collect(Collectors.toList());
 			ExecutorService UploadExecutor = Executors.newFixedThreadPool(10);
+			
+			   List<Future<String>> listForUploadStatus = new ArrayList<Future<String>>();
 			for (File file : filesInFolder) {
-				Runnable FolderUploader = new FolderUploaderToOneDrive(file, accessToken);
-				UploadExecutor.execute(FolderUploader);
+				 Callable<String> callableThread = new FolderUploaderToOneDrive(file, accessToken);
+				  Future<String> future = UploadExecutor.submit(callableThread);		
+				  listForUploadStatus.add(future);
 			}
 
 			UploadExecutor.shutdown();
@@ -1527,15 +1535,32 @@ public class UserServiceImpl implements UserService {
 				e.printStackTrace();
 			}
 			
-		}
+			for(Future<String> uploadResultForEachFile : listForUploadStatus){
+	            try {
+	                //print the return value of Future, notice the output delay in console
+	                // because Future.get() waits for task to get completed
+	            	statusOfAllThreads.append(uploadResultForEachFile.get()+"</br>");
+	                System.out.println(new Date()+ "::"+uploadResultForEachFile.get());
+	            } catch (InterruptedException | ExecutionException e) {
+	                e.printStackTrace();
+	            }
+	        }
 
-		
+		}
 
 		if (result == JOptionPane.CANCEL_OPTION) {
 
 		}
-
-		return null;
+		}
+		catch (Exception e) {
+			logger.info("Error occured while uploading a foder"+ e.getMessage());
+		}
+	
+		SuccessMessageObject messageObject = new SuccessMessageObject();
+		messageObject.setMessage(statusOfAllThreads.toString());
+		uploadFileView.addObject("message", messageObject);
+		uploadFileView.setViewName("display");
+		return uploadFileView;
 	}
 
 	/**
