@@ -1518,9 +1518,14 @@ public class UserServiceImpl implements UserService {
 
 			List<File> filesInFolder = Files.walk(Paths.get(pathGiven)).filter(Files::isRegularFile).map(Path::toFile)
 					.collect(Collectors.toList());
+			
+			 String TotalNoOfFilesInFolder = Integer.toString(filesInFolder.size());
+			 statusOfAllThreads.append("Total files inside the selected folder="+TotalNoOfFilesInFolder+"</br></br>");
 			ExecutorService UploadExecutor = Executors.newFixedThreadPool(10);
 			
 			   List<Future<String>> listForUploadStatus = new ArrayList<Future<String>>();
+			   
+			  
 			for (File file : filesInFolder) {
 				 Callable<String> callableThread = new FolderUploaderToOneDrive(file, accessToken);
 				  Future<String> future = UploadExecutor.submit(callableThread);		
@@ -1539,7 +1544,7 @@ public class UserServiceImpl implements UserService {
 	            try {
 	                //print the return value of Future, notice the output delay in console
 	                // because Future.get() waits for task to get completed
-	            	statusOfAllThreads.append(uploadResultForEachFile.get()+"</br>");
+	            	statusOfAllThreads.append(uploadResultForEachFile.get()+"</br></br>");
 	                System.out.println(new Date()+ "::"+uploadResultForEachFile.get());
 	            } catch (InterruptedException | ExecutionException e) {
 	                e.printStackTrace();

@@ -72,7 +72,7 @@ public class ParallelConverter implements Runnable {
 			File textdirectory = new File(officefile.getParent());
 			textdirectory.mkdir();
 			int index = officefile.getAbsolutePath().lastIndexOf(".");
-			String textdirectoryString = textdirectory.getPath() + "\\" + textNaming1.concat(".txt");
+			String textdirectoryString = textdirectory.getPath() + File.separator+ textNaming1.concat(".txt");
 
 			StringBuilder seperateTextFolderBuilder = new StringBuilder(textdirectoryString);
 

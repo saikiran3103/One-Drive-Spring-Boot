@@ -32,7 +32,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 	private int successCounter = 0;
 	private int failureCounter = 0;
 
-	private static final String base_path = "https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test";
+	private static final String base_path = "https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test/UploadFolderTest";
 	private static final int chunkSize = 320 * 1024 * 30;
 
 	public FolderUploaderToOneDrive(File file, String token) {
