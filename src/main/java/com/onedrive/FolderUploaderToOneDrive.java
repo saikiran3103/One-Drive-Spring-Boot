@@ -60,12 +60,12 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 	@Override
 	public String call() throws IOException {
 
-		FileInputStream fileInputStream =null;
-		
+		FileInputStream fileInputStream = null;
+
 		byte[] bytes;
 
 		try {
-	//		FileInputStream fileInputStream = new FileInputStream(file);
+			// FileInputStream fileInputStream = new FileInputStream(file);
 
 			long fourMBbsize = 4194304;
 
@@ -78,9 +78,8 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 				String labeledFilePath = file.getAbsolutePath();
 
 				getDriveIdAndPath(labeledFilePath);
-				
-				
-				 fileInputStream = new FileInputStream(file);
+
+				fileInputStream = new FileInputStream(file);
 
 				// String driveId =
 				// "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
@@ -91,14 +90,13 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 				String nameOfFile = file.getName(); // ");
 
 				// gets the start index after the documents path
-				
 
 				String contentStringAppender = ":/content";
 
 				String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
 				String uploadUrl = commonUrl + path + "/" + nameOfFileFormatted + contentStringAppender;
-				
-				System.out.println("uploadUrl-->"+uploadUrl);
+
+				System.out.println("uploadUrl-->" + uploadUrl);
 
 				bytes = new byte[(int) file.length()];
 
@@ -153,29 +151,23 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			else {
 
 				String nameOfFile = file.getName();
-				
-				
 
 				String labeledFilePath = file.getAbsolutePath();
 
-				
-				//method to get the path to upload to one drive from the file
+				// method to get the path to upload to one drive from the file
 				getDriveIdAndPath(labeledFilePath);
-				
-				 fileInputStream = new FileInputStream(file);
+
+				fileInputStream = new FileInputStream(file);
 
 				// using the lei drive Id ,change it later
-//				String driveId = "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
-//
+				// String driveId =
+				// "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+				//
 				String commonUrl = "https://graph.microsoft.com/v1.0";
-				
-				
-
-				
-			
 
 				String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
-				String sessionCreateUrl = commonUrl + path + "/" + nameOfFileFormatted  + ":/createUploadSession" + "?@name.conflictBehavior=replace";
+				String sessionCreateUrl = commonUrl + path + "/" + nameOfFileFormatted + ":/createUploadSession"
+						+ "?@name.conflictBehavior=replace";
 
 				DefaultHttpClient httpClient = new DefaultHttpClient();
 				final HttpPost httpRequest = new HttpPost(sessionCreateUrl);
@@ -314,8 +306,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			statusOfFileUpload = "Upload Error for " + file.getAbsolutePath();
 			System.err.println(ex.getMessage());
 			return statusOfFileUpload;
-		}
-		finally{
+		} finally {
 			fileInputStream.close();
 		}
 		return statusOfFileUpload;
@@ -350,7 +341,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			path = info.get("path");
 
 			System.out.println("path--->" + path);
-			
+
 			stamper.close();
 
 			fileInputStreamMetaData.close();
@@ -367,8 +358,8 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			POIXMLProperties propsForDoc = xWPFDocument.getProperties();
 
 			String Category = propsForDoc.getCoreProperties().getCategory();
-			
-			System.out.println("Category-->"+Category);
+
+			System.out.println("Category-->" + Category);
 
 			String[] metaDataArray = Category.split("-->");
 
@@ -385,7 +376,6 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			System.out.println("path--->" + path);
 
 			fileInputStream1.close();
-			
 
 		}
 
@@ -406,7 +396,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			String[] metaDataArray = Category.split("-->");
 
 			driveId = metaDataArray[0];
-			 path = metaDataArray[1];
+			path = metaDataArray[1];
 
 			System.out.println("driveId--->" + driveId);
 
@@ -418,7 +408,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			path = extractpath[1];
 
 			fileInputStream1.close();
-			
+
 		}
 
 		else if (file.getName().endsWith(".PPTX") || file.getName().endsWith(".pptx")) {
@@ -449,7 +439,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 
 			System.out.println("path--->" + path);
 			fileInputStream1.close();
-			
+
 		}
 
 		else if (file.getName().endsWith(".ppt") || file.getName().endsWith(".PPT")
@@ -485,7 +475,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 			System.out.println("path--->" + path);
 
 			fileInputStream1.close();
-			
+
 		} else {
 			System.err.println("Not a office file hence skipping");
 		}

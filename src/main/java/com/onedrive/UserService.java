@@ -14,6 +14,7 @@ import org.apache.xmlbeans.XmlException;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.gson.JsonSyntaxException;
+import com.itextpdf.text.DocumentException;
 
 public interface UserService {
 
@@ -30,18 +31,13 @@ public interface UserService {
 	public ModelAndView listSharedUsers(TokenAndPath tokenAndPath) throws IOException, IllegalStateException,
 			JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException;
 
-	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
-			String nameOfFile) throws ClientProtocolException, IOException, MessagingException;
+	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,FileInputStream fileContentForUpload,
+			String nameOfFile) throws ClientProtocolException, IOException, MessagingException, DocumentException;
 
-	public ModelAndView uploadLargeDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
-			String nameOfFile) throws ClientProtocolException, IOException, MessagingException;
-
-	public ModelAndView uploadLargeDocumentsToOneDriveSDK(TokenAndPath tokenAndPath, InputStream fileInputStream,
-			String nameOfFile) throws ClientProtocolException, IOException, MessagingException;
-
+	
 	public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath,
-			InputStream fileInputStream, String nameOfFile)
-			throws ClientProtocolException, IOException, MessagingException;
+			FileInputStream fileInputStream, FileInputStream fileContentForUpload, String nameOfFile)
+			throws ClientProtocolException, IOException, MessagingException, DocumentException;
 
 	public ModelAndView uploadFolderToOneDrive(TokenAndPath tokenAndPath)
 			throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException,

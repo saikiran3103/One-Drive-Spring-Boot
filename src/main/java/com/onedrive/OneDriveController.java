@@ -53,6 +53,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.google.gson.JsonSyntaxException;
+import com.itextpdf.text.DocumentException;
 
 @Controller
 public class OneDriveController {
@@ -206,7 +207,7 @@ public class OneDriveController {
 	@RequestMapping(method = RequestMethod.POST, value = "onedrive/uploadfiles")
 	public ModelAndView uploadDocumentsToOneDrive(HttpServletRequest request) throws URISyntaxException, IOException,
 			JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException,
-			XmlException, ServletException, FileUploadException, MessagingException {
+			XmlException, ServletException, FileUploadException, MessagingException, DocumentException {
 		HttpSession session = request.getSession();
 		// String driveId = request.getParameter("driveId");
 
@@ -234,13 +235,17 @@ public class OneDriveController {
 		logger.info(path + "path");
 
 		logger.info(filePart.getSubmittedFileName().getBytes() + "filePart.getName()");
-		InputStream fileContent = (FileInputStream) filePart.getInputStream();
+		FileInputStream fileContent = (FileInputStream) filePart.getInputStream();
+		
+		FileInputStream fileContentForUpload = (FileInputStream) filePart.getInputStream();
+		
+		
 
 		String nameOfFile = filePart.getSubmittedFileName();
 
 		byte[] fileArray = filePart.getSubmittedFileName().getBytes();
 
-		logger.info("inside upload files");
+		System.out.println("fileContent2-->" +fileContentForUpload.available());
 
 		long sizeOfInputStream = (long) fileContent.available();
 
@@ -251,10 +256,10 @@ public class OneDriveController {
 			// return
 			// service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
 
-			return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath, fileContent, nameOfFile);
+			return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath, fileContent,fileContentForUpload, nameOfFile);
 		}
 
-		return service.uploadDocumentsToOneDrive(tokenAndPath, fileContent, nameOfFile);
+		return service.uploadDocumentsToOneDrive(tokenAndPath, fileContent,fileContentForUpload, nameOfFile);
 		// return "displayPath";
 	}
 
