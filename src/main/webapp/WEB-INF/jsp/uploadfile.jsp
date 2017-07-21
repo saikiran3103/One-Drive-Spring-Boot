@@ -14,7 +14,7 @@
 
 </head>
 <body
-	style="text-align: center; font-style: italic; background-color: azure; color: red; font-size: larger; padding-top: 50px; background: url(http://www.planwallpaper.com/static/images/background-wallpapers-2.jpg) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
+	style="text-align: center; font-style: italic; background-color: azure; color: red; font-size: larger; padding-top: 50px; background: url(../images/blackBackground.jpg) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
 
 
 	<div class="form-style-2">

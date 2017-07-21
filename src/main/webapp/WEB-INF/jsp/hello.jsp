@@ -12,7 +12,7 @@
 <link href="${coreCss}" rel="stylesheet" />
 </head>
 <body
-	style="text-align: center; font-style: italic; background-color: azure; background: url(https://media.giphy.com/media/GCQzDWYV9BE4w/giphy.gif) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
+	style="text-align: center; font-style: italic; background-color: azure; background: url(../images/welcomeGif.gif) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
 
 	<article>
 		<header>

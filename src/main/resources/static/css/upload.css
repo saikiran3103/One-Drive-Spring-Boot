@@ -1,0 +1,87 @@
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+list3 { }
+#list3 ul { list-style-image: url("../images/arrow.png"); color:#eee; font-size:18px; }
+#list3 ul li { font-size:14px;
+
+    margin-left:25px;
+
+    padding:0px;
+
+    list-style:url(../images/arrow.png);
+
+    line-height:30px;}
+
+
+
+imglist { }
+
+#imglist ul{
+
+    margin:0px;
+
+}
+
+#imglist li{
+
+    font-size:20px;
+
+    margin-left:140px;
+
+    padding:0px;
+
+
+    list-style-image:url(../images/arrow.png);
+
+    line-height:30px;
+    
+    background-repeat: no-repeat; background-position: 0px 5px; padding-left:15px;
+
+}
+
+#imglist li a:link, .imglist li a:visited{
+
+    color:#1e598e;
+
+    text-decoration:none;
+
+ 
+
+}
+
+#imglist li a:hover{
+
+    color:#0A7CAF;
+
+    padding:2px;
+
+    -moz-box-shadow: 0px 0px 12px #9e9ea3;
+
+    -webkit-box-shadow: 0px 0px 12px #9e9ea3;
+
+    box-shadow: 0px 0px 12px #9e9ea3;
+
+    border:none 0px #000000;
+
+    -moz-border-radius: 3px;
+
+    -webkit-border-radius: 3px;
+
+    border-radius: 3px;
+
+}
+
+
+h1{
+	color:#ff2500;
+	font-size: xx-large;
+    font-style: italic;
+}
+
+h2{
+	color:#FF0000;
+	margin-left:110px;
+}
+myForm{
+	color:#ff2500;
+}

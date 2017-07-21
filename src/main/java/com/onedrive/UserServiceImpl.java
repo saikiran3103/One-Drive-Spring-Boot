@@ -1,7 +1,9 @@
 package com.onedrive;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
@@ -44,20 +46,30 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
-import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.POIXMLProperties;
+import org.apache.poi.hpsf.HPSFPropertiesOnlyDocument;
+import org.apache.poi.hpsf.SummaryInformation;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.xml.xmp.XmpWriter;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -80,12 +92,26 @@ public class UserServiceImpl implements UserService {
 
 	private static final int chunkSize = 320 * 1024 * 30;
 	final static Logger logger = Logger.getLogger(UserServiceImpl.class);
+	
+	
+	
+	
+	
+	
+	
+		
+		
 
 	private String home = System.getProperty("user.home");
+	
+	private String LAST_USED_FOLDER = home;
 
 	// changed to public to run on server
 
-	private String saveDir = "C://Users//Public";
+	
+	
+	@Value("${download.directory.complete}")
+	private String saveDir;// = "C://Users//Public";
 
 	private RandomAccessFile randFile;
 
@@ -94,6 +120,9 @@ public class UserServiceImpl implements UserService {
 
 		String url = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.read.all&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect";
 		String os = System.getProperty("os.name").toLowerCase();
+		
+		
+		
 		try {
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -137,6 +166,10 @@ public class UserServiceImpl implements UserService {
 			IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
 
 		ModelAndView enterLinkView = new ModelAndView();
+		
+		
+		
+		
 		try {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
@@ -212,12 +245,15 @@ public class UserServiceImpl implements UserService {
 
 				String Url = outerMetaData.getMicrosoft_graph_downloadUrl();
 
-				UserServiceImpl.downloadFile(Url, dir.getPath());
+				String driveIdMetaData = outerMetaData.getParentReference().getDriveId();
 
-				fileReaderAndConverter(file, dir);
+				String pathMetaData = outerMetaData.getParentReference().getPath();
 
-				messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString()
-						+ " <br> And Converted to text format");
+				UserServiceImpl.downloadFile(Url, dir.getPath(), driveIdMetaData, pathMetaData);
+
+				// fileReaderAndConverter(file, dir);
+
+				messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString());
 				enterLinkView.addObject("message", messageObject);
 				enterLinkView.setViewName("display");
 
@@ -279,6 +315,8 @@ public class UserServiceImpl implements UserService {
 
 			System.out.println("json form ");
 			System.out.println(outerMetaData);
+			List<ParentReference> listwithMetaData = new ArrayList<ParentReference>();
+
 			List<String> downloadUrls = new ArrayList<String>();
 			for (MetaDataForFolder metaDataForFolder : outerMetaData.getValue()) {
 
@@ -286,7 +324,17 @@ public class UserServiceImpl implements UserService {
 						&& (Integer.parseInt(metaDataForFolder.getFolder().getChildCount()) >= 1)) {
 					readingInnerFolders(tokenheader, commonUrl, base_path, child, file, dir, gson, metaDataForFolder);
 				} else {
+
+					ParentReference parentReference = new ParentReference();
+
 					String Url = metaDataForFolder.getMicrosoft_graph_downloadUrl();
+					String driveID = metaDataForFolder.getParentReference().getDriveId();
+
+					String path = metaDataForFolder.getParentReference().getPath();
+					parentReference.setId(Url);
+					parentReference.setDriveId(driveID);
+					parentReference.setPath(path);
+					listwithMetaData.add(parentReference);
 					downloadUrls.add(Url);
 				}
 			}
@@ -294,14 +342,14 @@ public class UserServiceImpl implements UserService {
 			System.out.println(downloadUrls);
 
 			// create the size of the thread pool dynamically
-			if (!downloadUrls.isEmpty()) {
-				ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
+			if (!listwithMetaData.isEmpty()) {
+				ExecutorService executor = Executors.newFixedThreadPool(listwithMetaData.size());
 				final long startTime = System.currentTimeMillis();
-				for (String downloadUrl : downloadUrls) {
+				for (ParentReference parentReference : listwithMetaData) {
 
 					System.out.println("saveDir------>" + saveDir);
 					// multithreading framework for downloading files
-					Runnable download = new MultiDownLoadExecutor(downloadUrl, dir.getPath());
+					Runnable download = new MultiDownLoadExecutor(parentReference, dir.getPath());
 					executor.execute(download);
 				}
 				executor.shutdown();
@@ -309,11 +357,11 @@ public class UserServiceImpl implements UserService {
 				final long endTime = System.currentTimeMillis();
 				System.out.println("Time taken to get Response in millis:" + (endTime - startTime));
 
-				concurrentConverter(file, dir, executor);
+				// concurrentConverter(file, dir, executor);
 			} else {
 
 				// for empty urls just convert the files
-				fileReaderAndConverter(file, dir);
+				// fileReaderAndConverter(file, dir);
 			}
 			messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString()
 					+ " <br>  And Converted to text format");
@@ -408,6 +456,8 @@ public class UserServiceImpl implements UserService {
 
 		List<String> downloadUrls1 = new ArrayList<String>();
 
+		List<ParentReference> listwithMetaData1 = new ArrayList<ParentReference>();
+
 		for (MetaDataForFolder metaDataForFolder1 : outerMetaData1.getValue()) {
 			if (metaDataForFolder1.getFolder() != null
 					&& (Integer.parseInt(metaDataForFolder1.getFolder().getChildCount()) >= 1)) {
@@ -415,12 +465,23 @@ public class UserServiceImpl implements UserService {
 						innerdir1, gson, metaDataForFolder1);
 			} else {
 				String Url1 = metaDataForFolder1.getMicrosoft_graph_downloadUrl();
+
+				ParentReference parentReference1 = new ParentReference();
+
+				String driveID = metaDataForFolder1.getParentReference().getDriveId();
+
+				String path1 = metaDataForFolder1.getParentReference().getPath();
+				parentReference1.setId(Url1);
+				parentReference1.setDriveId(driveID);
+				parentReference1.setPath(path1);
+				listwithMetaData1.add(parentReference1);
+
 				downloadUrls1.add(Url1);
 			}
 		}
-		if (!downloadUrls1.isEmpty()) {
-			ExecutorService executor1 = Executors.newFixedThreadPool(downloadUrls1.size());
-			for (String downloadUrl1 : downloadUrls1) {
+		if (!listwithMetaData1.isEmpty()) {
+			ExecutorService executor1 = Executors.newFixedThreadPool(listwithMetaData1.size());
+			for (ParentReference downloadUrl1 : listwithMetaData1) {
 
 				// multithreading framework for downloading files
 				Runnable download1 = new MultiDownLoadExecutor(downloadUrl1, innerdir1.getPath());
@@ -434,28 +495,12 @@ public class UserServiceImpl implements UserService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			// if( (executor1.awaitTermination(20, TimeUnit.SECONDS) )){
-			// List<File> filesInFolder =
-			// Files.walk(Paths.get(innerdir1.getPath()))
-			// .filter(Files::isRegularFile)
-			// .map(Path::toFile)
-			// .collect(Collectors.toList());
-			// ExecutorService converterExecutor =
-			// Executors.newFixedThreadPool(filesInFolder.size());
-			// for(File officefile:filesInFolder){
-			//
-			// //parallel conversion of all files
-			// Runnable converter= new ParallelConverter(officefile,
-			// insideFoldername);
-			// converterExecutor.execute(converter);
-			//
-			// }
-			// converterExecutor.shutdown();
-			// }
+			
 		}
 	}
 
-	public static void downloadFile(String fileURL, String saveDir) throws IOException {
+	public static void downloadFile(String fileURL, String saveDir, String driveId, String path)
+			throws IOException, DocumentException {
 		URL url = new URL(fileURL);
 		HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
 		int responseCode = httpConn.getResponseCode();
@@ -500,6 +545,148 @@ public class UserServiceImpl implements UserService {
 			inputStream.close();
 
 			System.out.println("File downloaded");
+
+			System.out.println("now adding hidden metadata");
+
+			File officefile = new File(saveFilePath);
+
+			System.out.println("Working on file " + officefile.getName());
+			String name = officefile.getName();
+
+			String labeledFilePath = officefile.getAbsolutePath();
+
+			if (officefile.getName().endsWith(".pdf") || officefile.getName().endsWith(".PDF")) {
+
+				System.out.println("inside pdf");
+
+				FileInputStream fileInputStream = new FileInputStream(officefile);
+				PdfReader reader = new PdfReader(fileInputStream);
+
+				PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(labeledFilePath));
+
+				// get and edit meta-data
+				HashMap<String, String> info = reader.getInfo();
+
+				info.put("driveId", driveId);
+				info.put("path", path);
+
+				// add updated meta-data to pdf
+				stamper.setMoreInfo(info);
+
+				// update xmp meta-data
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				XmpWriter xmp = new XmpWriter(baos, info);
+				xmp.close();
+				stamper.setXmpMetadata(baos.toByteArray());
+				stamper.close();
+				baos.close();
+				System.out.println("added label for " + name);
+			} else if (officefile.getName().endsWith(".docx") || officefile.getName().endsWith(".DOCX")) {
+
+				System.out.println("inside docx");
+				FileInputStream fileInputStream = new FileInputStream(officefile);
+
+				XWPFDocument xWPFDocument = new XWPFDocument(fileInputStream);
+
+				POIXMLProperties propsForDoc = xWPFDocument.getProperties();
+
+				propsForDoc.getCoreProperties().setDescription(driveId);
+
+				propsForDoc.getCustomProperties().addProperty("driveId", driveId);
+
+				propsForDoc.getCustomProperties().addProperty("path", path);
+
+				propsForDoc.commit();
+
+				FileOutputStream fileOutputStreamForLabeledfile = new FileOutputStream(labeledFilePath);
+				xWPFDocument.write(fileOutputStreamForLabeledfile);
+
+				fileOutputStreamForLabeledfile.close();
+				fileInputStream.close();
+				System.out.println("added label for " + name);
+
+			}
+
+			else if (officefile.getName().endsWith(".xlsx") || officefile.getName().endsWith(".XLSX")) {
+
+				System.out.println("inside xlsx");
+
+				FileInputStream fileInputStream = new FileInputStream(officefile);
+
+				XSSFWorkbook workbook = new XSSFWorkbook(fileInputStream);
+
+				POIXMLProperties poixmlPropertiesForXlsx = workbook.getProperties();
+
+				poixmlPropertiesForXlsx.getCoreProperties().setDescription(driveId);
+
+				poixmlPropertiesForXlsx.getCustomProperties().addProperty("driveId", driveId);
+
+				poixmlPropertiesForXlsx.getCustomProperties().addProperty("path", path);
+
+				poixmlPropertiesForXlsx.commit();
+				FileOutputStream fileOutputStreamForLabeledfile = new FileOutputStream(labeledFilePath);
+				workbook.write(fileOutputStreamForLabeledfile);
+				fileOutputStreamForLabeledfile.close();
+				fileInputStream.close();
+				System.out.println("added label for " + name);
+			}
+
+			else if (officefile.getName().endsWith(".PPTX") || officefile.getName().endsWith(".pptx")) {
+
+				System.out.println("inside PPTX");
+
+				FileInputStream fileInputStream = new FileInputStream(officefile);
+
+				XMLSlideShow ppt = new XMLSlideShow(fileInputStream);
+
+				POIXMLProperties pptxFileProps = ppt.getProperties();
+				pptxFileProps.getCoreProperties().setDescription(driveId);
+
+				pptxFileProps.getCustomProperties().addProperty("driveId", driveId);
+
+				pptxFileProps.getCustomProperties().addProperty("path", path);
+
+				pptxFileProps.commit();
+
+				FileOutputStream fileOutputStreamForLabeledfile = new FileOutputStream(labeledFilePath);
+				ppt.write(fileOutputStreamForLabeledfile);
+
+				fileOutputStreamForLabeledfile.close();
+				fileInputStream.close();
+				System.out.println("added label for " + name);
+			}
+
+			else if (officefile.getName().endsWith(".ppt") || officefile.getName().endsWith(".PPT")
+					|| (officefile.getName().endsWith(".xls") || officefile.getName().endsWith(".XLS"))
+					|| (officefile.getName().endsWith(".doc") || officefile.getName().endsWith(".DOC"))) {
+
+				System.out.println("inside doc,xls,ppt");
+
+				FileInputStream fileInputStream = new FileInputStream(officefile);
+
+				NPOIFSFileSystem fs = new NPOIFSFileSystem(fileInputStream);
+
+				HPSFPropertiesOnlyDocument doc = new HPSFPropertiesOnlyDocument(fs);
+
+				SummaryInformation si = doc.getSummaryInformation();
+				if (si == null)
+					doc.createInformationProperties();
+
+				si.setComments(driveId);
+
+				doc.getDocumentSummaryInformation().getCustomProperties().put("driveId", driveId);
+
+				doc.getDocumentSummaryInformation().getCustomProperties().put("path", path);
+
+				FileOutputStream fileOutputStreamForLabeledfile = new FileOutputStream(labeledFilePath);
+				doc.write(fileOutputStreamForLabeledfile);
+				fileOutputStreamForLabeledfile.close();
+				fileInputStream.close();
+				System.out.println("added label for " + name);
+			} else {
+				System.err.println("Not a office file hence skipping");
+			}
+
 		} else {
 			System.out.println("No file to download. Server replied HTTP code: " + responseCode);
 		}
@@ -582,6 +769,8 @@ public class UserServiceImpl implements UserService {
 			JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 
 		ModelAndView enterLinkView = new ModelAndView();
+		
+
 		try {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
@@ -663,6 +852,9 @@ public class UserServiceImpl implements UserService {
 			OpenXML4JException, XmlException {
 
 		ModelAndView enterLinkView = new ModelAndView();
+		
+		
+
 		try {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
@@ -743,9 +935,13 @@ public class UserServiceImpl implements UserService {
 
 				String Url = outerMetaData.getMicrosoft_graph_downloadUrl();
 
-				UserServiceImpl.downloadFile(Url, dir.getPath());
+				String driveIdMetaData = outerMetaData.getRemoteItem().getParentReference().getDriveId();
 
-				fileReaderAndConverter(file, dir);
+				String pathMetaData = outerMetaData.getRemoteItem().getParentReference().getPath();
+
+				UserServiceImpl.downloadFile(Url, dir.getPath(), driveIdMetaData, pathMetaData);
+
+				// fileReaderAndConverter(file, dir);
 
 				messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString()
 						+ " <br> And Converted to text format");
@@ -812,6 +1008,8 @@ public class UserServiceImpl implements UserService {
 			System.out.println("json form ");
 			System.out.println(outerMetaData);
 			List<String> downloadUrls = new ArrayList<String>();
+
+			List<ParentReference> listwithMetaData = new ArrayList<ParentReference>();
 			for (MetaDataForFolder metaDataForFolder : outerMetaData.getValue()) {
 
 				if (metaDataForFolder.getFolder() != null
@@ -819,20 +1017,29 @@ public class UserServiceImpl implements UserService {
 					readingInnerFolders(tokenheader, commonUrl, base_path, childAppender, folderPathAfterdocuments, dir,
 							gson, metaDataForFolder);
 				} else {
+					ParentReference parentReference = new ParentReference();
+
 					String Url = metaDataForFolder.getMicrosoft_graph_downloadUrl();
+					String driveID = metaDataForFolder.getParentReference().getDriveId();
+
+					String path = metaDataForFolder.getParentReference().getPath();
+					parentReference.setId(Url);
+					parentReference.setDriveId(driveID);
+					parentReference.setPath(path);
+					listwithMetaData.add(parentReference);
 					downloadUrls.add(Url);
 				}
 			}
 
 			// create the size of the thread pool dynamically
-			if (!downloadUrls.isEmpty()) {
-				ExecutorService executor = Executors.newFixedThreadPool(downloadUrls.size());
+			if (!listwithMetaData.isEmpty()) {
+				ExecutorService executor = Executors.newFixedThreadPool(listwithMetaData.size());
 				final long startTime = System.currentTimeMillis();
-				for (String downloadUrl : downloadUrls) {
+				for (ParentReference parentReference : listwithMetaData) {
 
 					System.out.println("saveDir------>" + saveDir);
 					// multithreading framework for downloading files
-					Runnable download = new MultiDownLoadExecutor(downloadUrl, dir.getPath());
+					Runnable download = new MultiDownLoadExecutor(parentReference, dir.getPath());
 					executor.execute(download);
 				}
 				executor.shutdown();
@@ -840,15 +1047,15 @@ public class UserServiceImpl implements UserService {
 				final long endTime = System.currentTimeMillis();
 				System.out.println("Time taken to get Response in millis:" + (endTime - startTime));
 
-				concurrentConverter(folderPathAfterdocuments, dir, executor);
+				// concurrentConverter(folderPathAfterdocuments, dir, executor);
 			} else {
 
 				// if there are no urls in the current folder
-				fileReaderAndConverter(folderPathAfterdocuments, dir);
+				// fileReaderAndConverter(folderPathAfterdocuments, dir);
 			}
 
 			messageObject.setMessage(
-					" Your files are downloaded to " + dir.getPath().toString() + " <br> And Converted to text format");
+					" Your files are downloaded to " + dir.getPath().toString() );
 			enterLinkView.addObject("message", messageObject);
 
 			logger.info(enterLinkView);
@@ -1432,7 +1639,8 @@ public class UserServiceImpl implements UserService {
 
 					ConcreteOneResponse concreteOneResponse1 = new ConcreteOneResponse(response);
 					if (concreteOneResponse1.wasSuccess()) {
-						//if request is successful a 202 accepted message is received 
+						// if request is successful a 202 accepted message is
+						// received
 						if (concreteOneResponse1.getStatusCode() == HttpStatus.SC_CREATED
 								|| concreteOneResponse1.getStatusCode() == HttpStatus.SC_OK) {
 							// if last chunk upload was successful end the
@@ -1443,7 +1651,7 @@ public class UserServiceImpl implements UserService {
 							uploadFileView.addObject("message", messageObject);
 							uploadFileView.setViewName("display");
 						} else {
-							// just continue until we get created status 
+							// just continue until we get created status
 							uploadSession = gson.fromJson(concreteOneResponse1.getBodyAsString(), UploadSession.class);
 
 							nextRanges = uploadSession.getNextRange();
@@ -1456,7 +1664,8 @@ public class UserServiceImpl implements UserService {
 
 				SuccessMessageObject messageObject = new SuccessMessageObject();
 				// write the proper message
-				messageObject.setMessage("Error occured  while uploading file " + nameOfFile+"<br>"+concreteOneResponse.getStatusLine()+"</br>");
+				messageObject.setMessage("Error occured  while uploading file " + nameOfFile + "<br>"
+						+ concreteOneResponse.getStatusLine() + "</br>");
 				uploadFileView.addObject("message", messageObject);
 				uploadFileView.setViewName("display");
 				return uploadFileView;
@@ -1483,101 +1692,102 @@ public class UserServiceImpl implements UserService {
 			throws ClientProtocolException, IOException, MessagingException, ClassNotFoundException,
 			InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 		ModelAndView uploadFileView = new ModelAndView();
-		
+
 		StringBuffer statusOfAllThreads = new StringBuffer();
-		
-		try{
+
+		List<Future<String>> listForUploadStatus = new ArrayList<Future<String>>();
+
+		List<String> finalListForUploadStatus = new ArrayList<String>();
+
+		try {
+
+			String accessToken = tokenAndPath.getToken();
+
+			// List to hold the status of process
+
+			// creating a folder choser from the local drive
 			
+			Preferences prefs = Preferences.userRoot().node(getClass().getName());
+
+		//	JFileChooser chooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 			
-			
-		String accessToken = tokenAndPath.getToken();
+			JFileChooser chooser = new JFileChooser(prefs.get(LAST_USED_FOLDER,
+				    new File(".").getAbsolutePath()));
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			chooser.updateUI();
+			chooser.setDialogTitle("Double Click to go inside ,click save to select folder: ");
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		// creating a folder choser from the local drive
+			int returnValue = chooser.showSaveDialog(null);
 
-		JFileChooser chooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		chooser.updateUI();
-		chooser.setDialogTitle("Double Click to go inside ,click save to select folder: ");
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			// Confirm dialog box the option from the user
 
-		int returnValue = chooser.showSaveDialog(null);
+			int result = JOptionPane.showConfirmDialog(null, "confirm " + chooser.getSelectedFile());
 
-		// Confirm dialog box the option from the user
+			while (result == JOptionPane.NO_OPTION) {
+				returnValue = chooser.showSaveDialog(null);
 
-		int result = JOptionPane.showConfirmDialog(null, "confirm " + chooser.getSelectedFile());
-
-		while (result == JOptionPane.NO_OPTION) {
-			returnValue = chooser.showSaveDialog(null);
-
-			result = JOptionPane.showConfirmDialog(null, "confirm " + chooser.getSelectedFile());
-		}
-
-		if ((returnValue == JFileChooser.APPROVE_OPTION) && (result == JOptionPane.YES_OPTION)) {
-
-			String pathGiven = chooser.getSelectedFile().toString();
-
-			List<File> filesInFolder = Files.walk(Paths.get(pathGiven)).filter(Files::isRegularFile).map(Path::toFile)
-					.collect(Collectors.toList());
-			
-			 String TotalNoOfFilesInFolder = Integer.toString(filesInFolder.size());
-			 statusOfAllThreads.append("Total files inside the selected folder="+TotalNoOfFilesInFolder+"</br></br>");
-			ExecutorService UploadExecutor = Executors.newFixedThreadPool(10);
-			
-			   List<Future<String>> listForUploadStatus = new ArrayList<Future<String>>();
-			   
-			  
-			for (File file : filesInFolder) {
-				 Callable<String> callableThread = new FolderUploaderToOneDrive(file, accessToken);
-				  Future<String> future = UploadExecutor.submit(callableThread);		
-				  listForUploadStatus.add(future);
+				result = JOptionPane.showConfirmDialog(null, "confirm " + chooser.getSelectedFile());
 			}
 
-			UploadExecutor.shutdown();
-			try {
-				UploadExecutor.awaitTermination(1800, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if ((returnValue == JFileChooser.APPROVE_OPTION) && (result == JOptionPane.YES_OPTION)) {
+				
+				
+				 prefs.put(LAST_USED_FOLDER, chooser.getSelectedFile().getParent());
+
+				String pathGiven = chooser.getSelectedFile().toString();
+
+				List<File> filesInFolder = Files.walk(Paths.get(pathGiven)).filter(Files::isRegularFile)
+						.map(Path::toFile).collect(Collectors.toList());
+
+				String TotalNoOfFilesInFolder = Integer.toString(filesInFolder.size());
+				statusOfAllThreads
+						.append("Total files inside the selected folder=" + TotalNoOfFilesInFolder + "</br></br>");
+				ExecutorService UploadExecutor = Executors.newFixedThreadPool(10);
+
+				for (File file : filesInFolder) {
+					Callable<String> callableThread = new FolderUploaderToOneDrive(file, accessToken);
+					Future<String> future = UploadExecutor.submit(callableThread);
+					listForUploadStatus.add(future);
+				}
+
+				UploadExecutor.shutdown();
+				try {
+					UploadExecutor.awaitTermination(1800, TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				for (Future<String> uploadResultForEachFile : listForUploadStatus) {
+					try {
+						// print the return value of Future, notice the output
+						// delay in console
+						// because Future.get() waits for task to get completed
+						statusOfAllThreads.append(uploadResultForEachFile.get() + "</br></br>");
+						finalListForUploadStatus.add(uploadResultForEachFile.get());
+						System.out.println(new Date() + "::" + uploadResultForEachFile.get());
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
+					}
+				}
+
 			}
-			
-			for(Future<String> uploadResultForEachFile : listForUploadStatus){
-	            try {
-	                //print the return value of Future, notice the output delay in console
-	                // because Future.get() waits for task to get completed
-	            	statusOfAllThreads.append(uploadResultForEachFile.get()+"</br></br>");
-	                System.out.println(new Date()+ "::"+uploadResultForEachFile.get());
-	            } catch (InterruptedException | ExecutionException e) {
-	                e.printStackTrace();
-	            }
-	        }
 
+			if (result == JOptionPane.CANCEL_OPTION) {
+
+			}
+		} catch (Exception e) {
+			logger.info("Error occured while uploading a foder" + e.getMessage());
 		}
 
-		if (result == JOptionPane.CANCEL_OPTION) {
-
-		}
-		}
-		catch (Exception e) {
-			logger.info("Error occured while uploading a foder"+ e.getMessage());
-		}
-	
 		SuccessMessageObject messageObject = new SuccessMessageObject();
 		messageObject.setMessage(statusOfAllThreads.toString());
-		uploadFileView.addObject("message", messageObject);
-		uploadFileView.setViewName("display");
+		uploadFileView.addObject("finalListForUploadStatus", finalListForUploadStatus);
+		uploadFileView.setViewName("uploadStatus");
 		return uploadFileView;
 	}
 
-	/**
-	 * Adds the label to a office document
-	 *
-	 * @param label
-	 *            and the file or file path
-	 * @return the status success and model name
-	 * @throws AppException
-	 *             the app exception
-	 * @throws TechException
-	 *             the tech exception
-	 */
+	
 
 }

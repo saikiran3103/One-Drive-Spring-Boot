@@ -35,7 +35,7 @@
     text-align: center;
     font-style: italic;
     background-color: azure;
-    background: url(http://www.planwallpaper.com/static/images/background-wallpapers-2.jpg) no-repeat center center fixed; 
+    background: url(../images/blackBackground.jpg) no-repeat center center fixed; 
   webkit-background-size: cover;
   moz-background-size: cover;
   o-background-size: cover;
