@@ -775,7 +775,7 @@ public class UserServiceImpl implements UserService {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
 
-			enterLinkView.setViewName("test1");
+			
 			String access_token = tokenAndPath.getToken();
 
 			String tokenheader = "Bearer" + " " + access_token;

@@ -1,7 +1,11 @@
 <HTML>
+
+
 <HEAD>
 
 <head>
+
+
    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     
   <style>
@@ -35,7 +39,7 @@
     text-align: center;
     font-style: italic;
     background-color: azure;
-    background: url(../images/blackBackground.jpg) no-repeat center center fixed; 
+    background: url(../images/robo.jpg) no-repeat center center fixed; 
   webkit-background-size: cover;
   moz-background-size: cover;
   o-background-size: cover;

@@ -1,5 +1,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,15 +11,33 @@
 	var="bootstrapCss" />
 <link href="${bootstrapCss}" rel="stylesheet" />
 <link href="${coreCss}" rel="stylesheet" />
+
+
+<c:url value="/css/upload.css" var="jstlCss" />
+	<link href="${jstlCss}" rel="stylesheet" />
 </head>
 <body
-	style="text-align: center; font-style: italic; background-color: azure; background: url(../images/welcomeGif.gif) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
+ <div id = bckimg
+	style="text-align: center; font-style: italic; 
+	background-color: azure; 
+	background: url(../images/robo.jpg) 
+	no-repeat center center fixed;
+	 webkit-background-size: cover;
+	  moz-background-size: cover; 
+	  o-background-size: cover;
+	   background-size: cover;" </div>>
+	   
+	  
 
 	<article>
 		<header>
 			<div style="text-align: center">
 				<h1
-					style="font-size: 34pt; font-family: serif; font-style: italic; font-feature-settings: initial; color: rgba(169, 66, 66, 0.98);">Download
+					style="font-size: 34pt;
+					 font-family: serif; 
+					 font-style: italic; 
+					 font-feature-settings: initial; 
+					 color: rgba(169, 66, 66, 0.98);">Download
 					the files from Microsoft One Drive cloud from the shared link</h1>
 			</div>
 
