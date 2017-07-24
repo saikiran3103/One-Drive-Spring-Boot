@@ -1,5 +1,6 @@
 package com.onedrive;
 
+import java.awt.Frame;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -17,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.filechooser.FileSystemView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -524,6 +524,8 @@ public class UserServiceImpl implements UserService {
 
 			System.out.println("now adding hidden metadata");
 
+			// adding the path to meta data, to retrieve it while uploading
+
 			File officefile = new File(saveFilePath);
 
 			System.out.println("Working on file " + officefile.getName());
@@ -556,6 +558,7 @@ public class UserServiceImpl implements UserService {
 				stamper.setXmpMetadata(baos.toByteArray());
 				stamper.close();
 				baos.close();
+				fileInputStream.close();
 				System.out.println("added label for " + name);
 			} else if (officefile.getName().endsWith(".docx") || officefile.getName().endsWith(".DOCX")) {
 
@@ -579,6 +582,7 @@ public class UserServiceImpl implements UserService {
 
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+
 				System.out.println("added label for " + name);
 
 			}
@@ -604,6 +608,7 @@ public class UserServiceImpl implements UserService {
 				workbook.write(fileOutputStreamForLabeledfile);
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+				workbook.close();
 				System.out.println("added label for " + name);
 			}
 
@@ -629,6 +634,7 @@ public class UserServiceImpl implements UserService {
 
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+
 				System.out.println("added label for " + name);
 			}
 
@@ -658,13 +664,14 @@ public class UserServiceImpl implements UserService {
 				doc.write(fileOutputStreamForLabeledfile);
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+				fs.close();
 				System.out.println("added label for " + name);
 			} else {
 				System.err.println("Not a office file hence skipping");
 			}
 
 		} else {
-			System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+			System.out.println("not a office or this app supported file, hence skipping");
 		}
 		httpConn.disconnect();
 	}
@@ -1316,6 +1323,11 @@ public class UserServiceImpl implements UserService {
 
 			// TODO: handle exception
 		}
+		
+		finally{
+			fileInputStream.close(); 
+		 fileContentForUpload.close();;
+		}
 
 		// TODO Auto-generated method stub
 
@@ -1345,13 +1357,24 @@ public class UserServiceImpl implements UserService {
 
 			// JFileChooser chooser = new
 			// JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+			
+			Frame frame=new JFrame();
+			
+			frame.setVisible(true);
+			
+			frame.setExtendedState(JFrame.ICONIFIED);
+            frame.setExtendedState(JFrame.NORMAL);
 
 			JFileChooser chooser = new JFileChooser(prefs.get(LAST_USED_FOLDER, new File(".").getAbsolutePath()));
+			
+			chooser.setFocusable(true);
+		
+			
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			chooser.updateUI();
 			chooser.setDialogTitle("Double Click to go inside ,click save to select folder: ");
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
+			
 			int returnValue = chooser.showSaveDialog(null);
 
 			// Confirm dialog box the option from the user
@@ -1366,6 +1389,8 @@ public class UserServiceImpl implements UserService {
 
 			if ((returnValue == JFileChooser.APPROVE_OPTION) && (result == JOptionPane.YES_OPTION)) {
 
+				
+				 frame.setVisible(false);
 				prefs.put(LAST_USED_FOLDER, chooser.getSelectedFile().getParent());
 
 				String pathGiven = chooser.getSelectedFile().toString();
@@ -1407,7 +1432,7 @@ public class UserServiceImpl implements UserService {
 
 			}
 
-			if (result == JOptionPane.CANCEL_OPTION) {
+			if (result == JOptionPane.CANCEL_OPTION ||returnValue==JOptionPane.CANCEL_OPTION ) {
 				uploadFileView.setViewName("uploadfile");
 				return uploadFileView;
 

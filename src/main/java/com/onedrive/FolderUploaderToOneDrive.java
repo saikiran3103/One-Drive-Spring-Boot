@@ -42,10 +42,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 	private boolean finished = false;
 	private String token;
 	private File file;
-	private int successCounter = 0;
-	private int failureCounter = 0;
-
-	private static final String base_path = "https://myoffice.accenture.com/personal/lei_a_ding_accenture_com/Documents/test/UploadFolderTest";
+	
 	private static final int chunkSize = 320 * 1024 * 30;
 
 	private String driveId;
@@ -81,8 +78,7 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 
 				fileInputStream = new FileInputStream(file);
 
-				// String driveId =
-				// "b!xTDMGJt6IEiuUTWPKWl2DIgyJcgGyIxOnPrOum8TeyfKUQRBWwV8TofsOMwgqCI2";
+				
 
 				String commonUrl = "https://graph.microsoft.com/v1.0";
 
@@ -273,6 +269,8 @@ public class FolderUploaderToOneDrive implements Callable<String> {
 					builder.header("Authorization", "bearer " + token);
 					Request request = builder.build();
 					OkHttpClient client = new OkHttpClient();
+					
+					
 					client.setConnectTimeout(60, TimeUnit.SECONDS); // connect
 																	// timeout
 					client.setReadTimeout(60, TimeUnit.SECONDS);

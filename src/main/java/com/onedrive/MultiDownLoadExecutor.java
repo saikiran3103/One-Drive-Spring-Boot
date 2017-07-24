@@ -139,6 +139,8 @@ public class MultiDownLoadExecutor implements Runnable {
 				stamper.setXmpMetadata(baos.toByteArray());
 				stamper.close();
 				baos.close();
+				fileInputStream.close();
+				reader.close();
 				System.out.println("added label for " + name);
 			} else if (officefile.getName().endsWith(".docx") || officefile.getName().endsWith(".DOCX")) {
 
@@ -163,7 +165,7 @@ public class MultiDownLoadExecutor implements Runnable {
 
 				FileOutputStream fileOutputStreamForLabeledfile = new FileOutputStream(labeledFilePath);
 				xWPFDocument.write(fileOutputStreamForLabeledfile);
-
+            
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
 				System.out.println("added label for " + name);
@@ -195,6 +197,7 @@ public class MultiDownLoadExecutor implements Runnable {
 				workbook.write(fileOutputStreamForLabeledfile);
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+				workbook.close();
 				System.out.println("added label for " + name);
 			}
 
@@ -223,6 +226,7 @@ public class MultiDownLoadExecutor implements Runnable {
 
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+
 				System.out.println("added label for " + name);
 			}
 
@@ -256,13 +260,15 @@ public class MultiDownLoadExecutor implements Runnable {
 				doc.write(fileOutputStreamForLabeledfile);
 				fileOutputStreamForLabeledfile.close();
 				fileInputStream.close();
+				
+				fs.close();
 				System.out.println("added label for " + name);
 			} else {
 				System.err.println("Not a office file hence skipping");
 			}
 
 		} else {
-			System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+			System.out.println(" not  a office file hence not adding any hidden metadata");
 		}
 		httpConn.disconnect();
 	}
