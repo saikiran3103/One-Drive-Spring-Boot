@@ -882,7 +882,7 @@ public class UserServiceImpl implements UserService {
 
 				String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
 
-				File dir = new File(saveDir + "\\" + extensionLessDirectory);
+				File dir = new File(saveDir + "/" + extensionLessDirectory);
 
 				dir.mkdirs();
 
@@ -951,7 +951,7 @@ public class UserServiceImpl implements UserService {
 					+ childAppender;
 
 			// making a directory
-			File dir = new File(saveDir + "\\" + MakeLocalDirectory);
+			File dir = new File(saveDir + "/" + MakeLocalDirectory);
 			dir.mkdirs();
 
 			System.out.println(completeurl);
