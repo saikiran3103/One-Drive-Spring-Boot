@@ -73,7 +73,7 @@
 
 > Personal Items </p></div>
 <div style="text-align:center"> 
-<form name="myForm" action="path1" method="POST">
+<form name="myForm" action="personalfiles" method="POST">
 
 
 <p style="

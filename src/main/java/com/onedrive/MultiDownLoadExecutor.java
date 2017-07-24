@@ -108,7 +108,7 @@ public class MultiDownLoadExecutor implements Runnable {
 
 			File officefile = new File(saveFilePath);
 
-			String pathToFile = "/sai/path";
+			
 
 			System.out.println("Working on file " + officefile.getName());
 			String name = officefile.getName();

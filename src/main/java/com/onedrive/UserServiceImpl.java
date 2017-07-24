@@ -92,24 +92,13 @@ public class UserServiceImpl implements UserService {
 
 	private static final int chunkSize = 320 * 1024 * 30;
 	final static Logger logger = Logger.getLogger(UserServiceImpl.class);
-	
-	
-	
-	
-	
-	
-	
-		
-		
 
 	private String home = System.getProperty("user.home");
-	
+
 	private String LAST_USED_FOLDER = home;
 
 	// changed to public to run on server
 
-	
-	
 	@Value("${download.directory.complete}")
 	private String saveDir;// = "C://Users//Public";
 
@@ -120,9 +109,7 @@ public class UserServiceImpl implements UserService {
 
 		String url = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=c00a4c26-e64b-459b-91f6-31571b802ae4&scope=files.read.all&response_type=token&redirect_uri=http://localhost:8080/onedrive/redirect";
 		String os = System.getProperty("os.name").toLowerCase();
-		
-		
-		
+
 		try {
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -166,10 +153,7 @@ public class UserServiceImpl implements UserService {
 			IllegalStateException, JsonSyntaxException, InterruptedException, NumberFormatException {
 
 		ModelAndView enterLinkView = new ModelAndView();
-		
-		
-		
-		
+
 		try {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
@@ -213,7 +197,7 @@ public class UserServiceImpl implements UserService {
 
 				String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
 
-				File dir = new File(saveDir + "/Downloads/" + extensionLessDirectory);
+				File dir = new File(saveDir + "/" + extensionLessDirectory);
 
 				dir.mkdirs();
 
@@ -266,11 +250,10 @@ public class UserServiceImpl implements UserService {
 
 			String commonUrl = "https://graph.microsoft.com/beta/me/";
 
-			// String base_path =
-			// "https://myoffice.accenture.com/personal/sai_kiran_akkireddy_accenture_com/Documents/testDownload";
 			String base_path = tokenAndPath.getPath();// replaceAll("%20", " ");
 
-			// gets the start index after the documents path
+			// gets the start index after the documents path, Assuming every
+			// shared url will be having documents in it.
 			int indexAfterDocuments = base_path.lastIndexOf("Documents") + 10;
 
 			String file = base_path.substring(indexAfterDocuments);
@@ -284,13 +267,9 @@ public class UserServiceImpl implements UserService {
 
 			String completeurl = commonUrl + "drive/root:/" + file + child;
 
-			System.out.println("saiiii" + "" + file);
-
 			// making a directory
-			File dir = new File(saveDir + "/Downloads/" + MakeLocalDirectory);
+			File dir = new File(saveDir + "/" + MakeLocalDirectory);
 			dir.mkdirs();
-
-			System.out.println(completeurl);
 
 			// make a get call to one drive api
 
@@ -313,8 +292,6 @@ public class UserServiceImpl implements UserService {
 
 			OuterMetaData outerMetaData = gson.fromJson(responseFromAdaptor, OuterMetaData.class);
 
-			System.out.println("json form ");
-			System.out.println(outerMetaData);
 			List<ParentReference> listwithMetaData = new ArrayList<ParentReference>();
 
 			List<String> downloadUrls = new ArrayList<String>();
@@ -363,8 +340,7 @@ public class UserServiceImpl implements UserService {
 				// for empty urls just convert the files
 				// fileReaderAndConverter(file, dir);
 			}
-			messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString()
-					+ " <br>  And Converted to text format");
+			messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString());
 			enterLinkView.addObject("message", messageObject);
 
 			logger.info(enterLinkView);
@@ -495,7 +471,7 @@ public class UserServiceImpl implements UserService {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
 
@@ -769,13 +745,11 @@ public class UserServiceImpl implements UserService {
 			JsonSyntaxException, InterruptedException, NumberFormatException, OpenXML4JException, XmlException {
 
 		ModelAndView enterLinkView = new ModelAndView();
-		
 
 		try {
 
 			SuccessMessageObject messageObject = new SuccessMessageObject();
 
-			
 			String access_token = tokenAndPath.getToken();
 
 			String tokenheader = "Bearer" + " " + access_token;
@@ -852,8 +826,6 @@ public class UserServiceImpl implements UserService {
 			OpenXML4JException, XmlException {
 
 		ModelAndView enterLinkView = new ModelAndView();
-		
-		
 
 		try {
 
@@ -903,7 +875,7 @@ public class UserServiceImpl implements UserService {
 
 				String extensionLessDirectory = MakeLocalDirectory.substring(0, indexToRemoveExntension);
 
-				File dir = new File(saveDir + "\\Downloads\\" + extensionLessDirectory);
+				File dir = new File(saveDir + "\\" + extensionLessDirectory);
 
 				dir.mkdirs();
 
@@ -943,8 +915,7 @@ public class UserServiceImpl implements UserService {
 
 				// fileReaderAndConverter(file, dir);
 
-				messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString()
-						+ " <br> And Converted to text format");
+				messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString());
 				enterLinkView.addObject("message", messageObject);
 				enterLinkView.setViewName("display");
 
@@ -972,10 +943,8 @@ public class UserServiceImpl implements UserService {
 			String completeurl = commonUrl + "/drives/" + driveId + "/root:/" + folderPathAfterdocuments
 					+ childAppender;
 
-			System.out.println("saiiii" + "" + folderPathAfterdocuments);
-
 			// making a directory
-			File dir = new File(saveDir + "\\Downloads\\" + MakeLocalDirectory);
+			File dir = new File(saveDir + "\\" + MakeLocalDirectory);
 			dir.mkdirs();
 
 			System.out.println(completeurl);
@@ -1054,8 +1023,7 @@ public class UserServiceImpl implements UserService {
 				// fileReaderAndConverter(folderPathAfterdocuments, dir);
 			}
 
-			messageObject.setMessage(
-					" Your files are downloaded to " + dir.getPath().toString() );
+			messageObject.setMessage(" Your files are downloaded to " + dir.getPath().toString());
 			enterLinkView.addObject("message", messageObject);
 
 			logger.info(enterLinkView);
@@ -1079,43 +1047,27 @@ public class UserServiceImpl implements UserService {
 	 */
 
 	@Override
-	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,FileInputStream fileContentForUpload,
-			String nameOfFile) throws ClientProtocolException, IOException, MessagingException, DocumentException {
+	public ModelAndView uploadDocumentsToOneDrive(TokenAndPath tokenAndPath, InputStream fileInputStream,
+			FileInputStream fileContentForUpload, String nameOfFile)
+			throws ClientProtocolException, IOException, MessagingException, DocumentException {
 
 		ModelAndView uploadFileView = new ModelAndView();
 
 		String access_token = tokenAndPath.getToken();
 
-		String driveId = tokenAndPath.getDriveId();
-		
-		
-		
+		// method to read the meta data to get the path to be uploaded.
 
 		ReadDriveIdAndPath readDriveIdAndPath = new ReadDriveIdAndPath(fileContentForUpload, nameOfFile);
-		
-	
-		
-		
-	    String path = 	readDriveIdAndPath.getDriveIdAndPath();
 
-	    String commonUrl = "https://graph.microsoft.com/v1.0";
+		String path = readDriveIdAndPath.getDriveIdAndPath();
 
-		// path to which the file should be uploaded
-		String base_path = tokenAndPath.getPath();// replaceAll("%20", " ");
-
-		// gets the start index after the documents path
-		int indexAfterDocuments = base_path.lastIndexOf("Documents") + 10;
-
-		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
+		String commonUrl = "https://graph.microsoft.com/v1.0";
 
 		String contentStringAppender = ":/content";
 
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
-		String completeurl = commonUrl + path+ "/" + nameOfFileFormatted
-				+ contentStringAppender;
+		String completeurl = commonUrl + path + "/" + nameOfFileFormatted + contentStringAppender;
 
-		// String completeurl
-		// ="https://graph.microsoft.com/beta/me/drive/root:/"+file.getName()+":/content";
 		try
 
 		{
@@ -1157,7 +1109,7 @@ public class UserServiceImpl implements UserService {
 			uploadFileView.addObject("message", messageObject);
 			uploadFileView.setViewName("display");
 		}
-		
+
 		SuccessMessageObject messageObject = new SuccessMessageObject();
 		messageObject.setMessage("successfully uploaded " + nameOfFile + " to users shared drive");
 		uploadFileView.addObject("message", messageObject);
@@ -1166,7 +1118,6 @@ public class UserServiceImpl implements UserService {
 		return uploadFileView;
 	}
 
-	
 	private boolean isCompleteURL(String url) {
 		try {
 			URL u = new URL(url); // this would check for the protocol
@@ -1178,45 +1129,30 @@ public class UserServiceImpl implements UserService {
 		return true;
 	}
 
-	
-	
 	@Override
 	public ModelAndView uploadLargeDocumentsToOneDriveSDKByInputStream(TokenAndPath tokenAndPath,
-			FileInputStream fileInputStream,FileInputStream fileContentForUpload ,String nameOfFile)
+			FileInputStream fileInputStream, FileInputStream fileContentForUpload, String nameOfFile)
 			throws ClientProtocolException, IOException, MessagingException, DocumentException {
 
 		ModelAndView uploadFileView = new ModelAndView();
 
-		
-	
 		String access_token = tokenAndPath.getToken();
 
 		byte[] bytes;
-		
-		
-		ReadDriveIdAndPath readDriveIdAndPath = new ReadDriveIdAndPath(fileInputStream, nameOfFile);
-		
-		
-	    String path = 	readDriveIdAndPath.getDriveIdAndPath();
 
-		String driveId = tokenAndPath.getDriveId();
+		ReadDriveIdAndPath readDriveIdAndPath = new ReadDriveIdAndPath(fileInputStream, nameOfFile);
+
+		String path = readDriveIdAndPath.getDriveIdAndPath();
 
 		String commonUrl = "https://graph.microsoft.com/v1.0";
-
-		String base_path = tokenAndPath.getPath();// replaceAll("%20", " ");
-
-		// gets the start index after the documents path
-		int indexAfterDocuments = base_path.lastIndexOf("Documents") + 10;
-
-		String folderPathAfterdocuments = base_path.substring(indexAfterDocuments);
 
 		String nameOfFileFormatted = nameOfFile.replace(" ", "%20");
 		try
 
 		{
 
-			String sessionCreateUrl = commonUrl +path + "/"
-					+ nameOfFileFormatted + ":/createUploadSession" + "?@name.conflictBehavior=replace";
+			String sessionCreateUrl = commonUrl + path + "/" + nameOfFileFormatted + ":/createUploadSession"
+					+ "?@name.conflictBehavior=replace";
 
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			final HttpPost httpRequest = new HttpPost(sessionCreateUrl);
@@ -1266,13 +1202,11 @@ public class UserServiceImpl implements UserService {
 
 				String uploadUrl = uploadSessionCreateResponse.getUploadUrl();
 
-				URL uploadURL = new URL(uploadUrl.toString());
-
 				int numToCalculateEndrange = 1;
 				int endRange = 0;
 				int content_length = 0;
 				long nextRanges = 0L;
-				fileInputStream= fileContentForUpload;
+				fileInputStream = fileContentForUpload;
 				long fileInputStreamIntilialSize = fileInputStream.available();
 				finished = false;
 				canceled = false;
@@ -1302,7 +1236,7 @@ public class UserServiceImpl implements UserService {
 
 					String Content_length = Integer.toString(content_length);
 					uploadChunk.addHeader("Content-Length", (content_length) + "");
-
+					logger.info("Content-Length      " + content_length);
 					uploadChunk.addHeader("Content-Range",
 							String.format("bytes %s-%s/%s", nextRanges, endRange, fileInputStreamIntilialSize));
 
@@ -1406,13 +1340,13 @@ public class UserServiceImpl implements UserService {
 			// List to hold the status of process
 
 			// creating a folder choser from the local drive
-			
+
 			Preferences prefs = Preferences.userRoot().node(getClass().getName());
 
-		//	JFileChooser chooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
-			
-			JFileChooser chooser = new JFileChooser(prefs.get(LAST_USED_FOLDER,
-				    new File(".").getAbsolutePath()));
+			// JFileChooser chooser = new
+			// JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+
+			JFileChooser chooser = new JFileChooser(prefs.get(LAST_USED_FOLDER, new File(".").getAbsolutePath()));
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			chooser.updateUI();
 			chooser.setDialogTitle("Double Click to go inside ,click save to select folder: ");
@@ -1431,9 +1365,8 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if ((returnValue == JFileChooser.APPROVE_OPTION) && (result == JOptionPane.YES_OPTION)) {
-				
-				
-				 prefs.put(LAST_USED_FOLDER, chooser.getSelectedFile().getParent());
+
+				prefs.put(LAST_USED_FOLDER, chooser.getSelectedFile().getParent());
 
 				String pathGiven = chooser.getSelectedFile().toString();
 
@@ -1475,6 +1408,8 @@ public class UserServiceImpl implements UserService {
 			}
 
 			if (result == JOptionPane.CANCEL_OPTION) {
+				uploadFileView.setViewName("uploadfile");
+				return uploadFileView;
 
 			}
 		} catch (Exception e) {
@@ -1487,7 +1422,5 @@ public class UserServiceImpl implements UserService {
 		uploadFileView.setViewName("uploadStatus");
 		return uploadFileView;
 	}
-
-	
 
 }

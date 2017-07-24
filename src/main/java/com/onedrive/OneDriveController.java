@@ -40,7 +40,7 @@ public class OneDriveController {
 		this.service = service;
 	}
 
-	/* method to get to the welcome page */
+	/* method to get to the welcome page , takes to hello.jsp*/
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public ModelAndView connect(ModelMap model) {
 
@@ -58,31 +58,43 @@ public class OneDriveController {
 
 	}
 
+	
+	/* method to authorize the user and get token , response or token will be sent to redirect url*/
 	@RequestMapping(value = "/token", method = RequestMethod.GET)
 	public String authorizeAndGetUserToken() throws URISyntaxException {
 
 		return service.authorizeAndGetUserToken();
 	}
 
-	/* method to handle the redirect token sent */
+	/* method to handle the redirect token sent and parse token jsp is view  */
 	@RequestMapping(value = "onedrive/redirect", method = RequestMethod.GET)
 	public String readToken(@RequestParam(value = "code", required = false) String code, HttpServletRequest request)
 			throws URISyntaxException {
 
-		
-
-		logger.info("Request" + request.toString());
-
 		return "parsetoken";
 	}
+	
+	
+	// method to extra  redirect to get the token from hash url 
+		@RequestMapping(method = RequestMethod.POST, value = "onedrive/downloadfiles")
+		public String getTokenAndPath1(HttpServletRequest request)
+				throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
+				NumberFormatException, OpenXML4JException, XmlException {
+			HttpSession session = request.getSession();
+			session.setAttribute("token", request.getParameter("param1"));
+		
+		
+			return "downloadfilesview";
+			
+		}
 
 	/*
-	 * final Method to download the files from personal one drive
+	 *  Method to download the files from personal one drive
 	 * 
-	 * 
+	 * token from the session attribute
 	 * 
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "onedrive/path1")
+	@RequestMapping(method = RequestMethod.POST, value = "onedrive/personalfiles")
 	public ModelAndView getPersonalFilesAndConvertToText(HttpServletRequest request)
 			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
 			NumberFormatException, OpenXML4JException, XmlException {
@@ -103,7 +115,7 @@ public class OneDriveController {
 	public ModelAndView getSharedUsers(HttpServletRequest request)
 			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
 			NumberFormatException, OpenXML4JException, XmlException {
-		// System.out.println(request.getParameter("param1"));
+		
 
 		HttpSession session = request.getSession();
 
@@ -113,7 +125,7 @@ public class OneDriveController {
 		TokenAndPath tokenAndPath = new TokenAndPath();
 		tokenAndPath.setToken((String) session.getAttribute("token"));
 		tokenAndPath.setPath(request.getParameter("param3"));
-		logger.info("accesstoken: " + session.getAttribute("token"));
+
 		return service.listSharedUsers(tokenAndPath);
 
 	}
@@ -124,8 +136,8 @@ public class OneDriveController {
 	public ModelAndView getSharedFilesAndConvertToText(HttpServletRequest request)
 			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
 			NumberFormatException, OpenXML4JException, XmlException {
-		// System.out.println(request.getParameter("param1"));
-		System.out.println(request.getParameter("param2"));
+	
+		
 		HttpSession session = request.getSession();
 
 		
@@ -145,18 +157,7 @@ public class OneDriveController {
 
 	}
 
-	// method to redirect to get the token from hash url 
-	@RequestMapping(method = RequestMethod.POST, value = "onedrive/downloadfiles")
-	public String getTokenAndPath1(HttpServletRequest request)
-			throws URISyntaxException, IOException, JsonSyntaxException, IllegalStateException, InterruptedException,
-			NumberFormatException, OpenXML4JException, XmlException {
-		HttpSession session = request.getSession();
-		session.setAttribute("token", request.getParameter("param1"));
 	
-		logger.info("sai is testing logs");
-		return "downloadfilesview";
-		// return "displayPath";
-	}
 
 	
 	//method to go to the upload jsp page
@@ -169,7 +170,7 @@ public class OneDriveController {
 
 	}
 
-	// method to upload a single file to shared drive
+	// method to upload a single file to shared drive, consists of large file and small file implementation
 	@RequestMapping(method = RequestMethod.POST, value = "onedrive/uploadfiles")
 	public ModelAndView uploadDocumentsToOneDrive(HttpServletRequest request) throws URISyntaxException, IOException,
 			JsonSyntaxException, IllegalStateException, InterruptedException, NumberFormatException, OpenXML4JException,
@@ -181,7 +182,7 @@ public class OneDriveController {
 
 		
 
-		System.out.println(session.getAttribute("token"));
+		
 
 		TokenAndPath tokenAndPath = new TokenAndPath();
 
@@ -198,9 +199,7 @@ public class OneDriveController {
 
 		tokenAndPath.setPath(path);
 
-		logger.info(path + "path");
-
-		logger.info(filePart.getSubmittedFileName().getBytes() + "filePart.getName()");
+		
 		FileInputStream fileContent = (FileInputStream) filePart.getInputStream();
 
 		FileInputStream fileContentForUpload = (FileInputStream) filePart.getInputStream();
@@ -208,23 +207,21 @@ public class OneDriveController {
 		String nameOfFile = filePart.getSubmittedFileName();
 
 		
-		System.out.println("fileContent2-->" + fileContentForUpload.available());
-
+		
 		long sizeOfInputStream = (long) fileContent.available();
 
 		long fourMBbsize = 4194304;
 	
 
 		if (sizeOfInputStream > fourMBbsize) {
-			// return
-			// service.uploadLargeDocumentsToOneDriveSDK(tokenAndPath,fileContent,nameOfFile);
+		
 
 			return service.uploadLargeDocumentsToOneDriveSDKByInputStream(tokenAndPath, fileContent,
 					fileContentForUpload, nameOfFile);
 		}
 
 		return service.uploadDocumentsToOneDrive(tokenAndPath, fileContent, fileContentForUpload, nameOfFile);
-		// return "displayPath";
+		
 	}
 
 	/*
@@ -253,7 +250,7 @@ public class OneDriveController {
 
 		return service.uploadFolderToOneDrive(tokenAndPath);
 
-		// return null;
+		
 	}
 
 }
