@@ -9,7 +9,7 @@
 <title>downloaded</title>
 </head>
 <body
-	style="text-align: center; font-style: italic; background-color: azure; background: url(../images/welcomeGif.gif) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
+	style="text-align: center; font-style: italic; background-color: azure; background: url(../images/robo.jpg) no-repeat center center fixed; webkit-background-size: cover; moz-background-size: cover; o-background-size: cover; background-size: cover;">
 
 
 	<div style="text-align: center">

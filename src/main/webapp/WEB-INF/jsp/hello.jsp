@@ -37,7 +37,7 @@
 					 font-family: serif; 
 					 font-style: italic; 
 					 font-feature-settings: initial; 
-					 color: rgba(169, 66, 66, 0.98);">Download
+					 color: #3c3634;">Download
 					the files from Microsoft One Drive cloud from the shared link</h1>
 			</div>
 
@@ -52,7 +52,7 @@
 		<div>
 			<div style="text-align: center">
 				<p class="ms-font"
-					style="font-size: 22pt; font-family: monospace; font-style: inherit; font-feature-settings: initial; color: #3f3430; width: 1800px; margin-top: 85px;">Use
+					style="font-size: 22pt; font-family: monospace; font-style: inherit; font-feature-settings: initial; color: #3f3430; width: 2170px; margin-top: 85px;">Use
 					the button below to connect to Office 365.</p>
 			</div>
 			<div style="text-align: center">

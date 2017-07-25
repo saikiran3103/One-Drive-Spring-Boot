@@ -54,7 +54,7 @@
     font-style: italic;
     font-feature-settings: initial;
     padding-top: 43px;
-    color: #FF5722;">Get the files or folders from One Micorsoft One Drive Cloud from the shared link</h1>
+    color: #3c3634;">Get the files or folders from One Micorsoft One Drive Cloud from the shared link</h1>
     
     </div>
   </header>
@@ -82,7 +82,7 @@
     font-size: 18pt;
     font-style: italic;
     font-feature-settings: initial;
-    color: #ffeb3b;
+    color: #3c3634;
     width: 1545px;
     margin-top: 60px;
     ">Enter the One drive Link for Your Personal Items :</p>
@@ -98,7 +98,7 @@ box-shadow: 0 0 20px black;
   cursor: pointer;
 
 "
- Value="Download And Convert" onclick="submitform();">
+ Value="Download" onclick="submitform();">
 </form>
 
 </div>
@@ -123,7 +123,7 @@ box-shadow: 0 0 20px black;
     font-size: 18pt;
     font-style: italic;
     font-feature-settings: initial;
-    color: #ffeb3b;
+    color: #3c3634;
     width: 1545px;
     margin-top: 60px;
     ">Enter the  One drive Link for Shared Items :</p>
@@ -137,7 +137,7 @@ box-shadow: 0 0 20px black;
  
   cursor: pointer;
 
-padding:3px;" Value="Download And Convert" onclick="submitform2();">
+padding:3px;" Value="Download" onclick="submitform2();">
 </form>
  
 
