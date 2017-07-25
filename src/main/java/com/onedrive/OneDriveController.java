@@ -195,9 +195,7 @@ public class OneDriveController {
 
 		tokenAndPath.setFileSize(fileSize);
 
-		String path = request.getParameter("path");
-
-		tokenAndPath.setPath(path);
+		
 
 		
 		FileInputStream fileContent = (FileInputStream) filePart.getInputStream();
