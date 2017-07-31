@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
+    <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -10,6 +11,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page session="true" %>
+<c:url value="../css/upload.css" var="jstlCss" />
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <title>shared users</title>
 </head>
@@ -39,6 +41,10 @@
      font-size:  x-large;">
 This is the URL you provided, check the user name in the url and confirm the user<br>
 </p>
+<div id="cover" style="display: none">
+
+
+  </div>
 <p   id = "sharedItemUrl" style= "
      color:#0029ff;
      font-size:  x-large;"><c:out value="${sessionScope.sharedItemUrl}"/>"</p>
@@ -96,6 +102,7 @@ function submitUser() {
 	oimageDiv.style.display=(oimageDiv.style.display=='none')?'inline':'none' 
 	
 	$("#c").hide();
+	$("#cover").show();
 	
 	
 	
@@ -104,7 +111,7 @@ function submitUser() {
 	document.getElementById("sharedItemUrl").innerHTML ="";
 	   
 	
-	document.getElementById("message").innerHTML ="Please wait while we are downloading and Converting your shared files ...";
+	document.getElementById("message").innerHTML ="Please wait while we are downloading your shared files ...";
    
 	document.getElementById("driveId").value =document.querySelector('input[name="myRadio"]:checked').value;
 	

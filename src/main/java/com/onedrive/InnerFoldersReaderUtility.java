@@ -33,6 +33,8 @@ public class InnerFoldersReaderUtility {
 		// form the url to get the children files for inside folder
 
 		String OneDriveinsideFolderUrl = commonUrl + path + "/" + insideFoldername + child;
+		
+		OneDriveinsideFolderUrl.replaceAll(" ", "%20");
 
 		// make a local directory with the folder structure
 

@@ -405,6 +405,8 @@ public class UserServiceImpl implements UserService {
 		// form the url to get the children files for inside folder
 
 		String OneDriveinsideFolderUrl = commonUrl + path + "/" + insideFoldername + child;
+		
+		OneDriveinsideFolderUrl=OneDriveinsideFolderUrl.replaceAll(" ", "%20");
 
 		// make a local directory with the folder structure
 
@@ -950,6 +952,9 @@ public class UserServiceImpl implements UserService {
 			String completeurl = commonUrl + "/drives/" + driveId + "/root:/" + folderPathAfterdocuments
 					+ childAppender;
 
+			
+			completeurl=	completeurl.replace(" ", "%20");
+			
 			// making a directory
 			File dir = new File(saveDir + "/" + MakeLocalDirectory);
 			dir.mkdirs();
