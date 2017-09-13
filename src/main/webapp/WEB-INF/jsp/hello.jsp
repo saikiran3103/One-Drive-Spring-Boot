@@ -33,7 +33,7 @@
 		<header>
 			<div style="text-align: center">
 				<h1
-					style="font-size: 34pt;
+					style="font-size: 35pt;
 					 font-family: serif; 
 					 font-style: italic; 
 					 font-feature-settings: initial; 

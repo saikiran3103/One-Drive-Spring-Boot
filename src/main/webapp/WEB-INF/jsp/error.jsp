@@ -9,6 +9,6 @@
 <body>
 
 
-Error occurred in the http requests
+Error occurred in the https requests
 </body>
 </html>
