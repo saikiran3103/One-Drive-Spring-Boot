@@ -37,7 +37,7 @@
 	<div>
 		<p
 			style="text-align: center font-size: x-large; font-style: italic; font-feature-settings: initial; color: rgba(24, 69, 243, 0.82); width: 1750px; margin-top: 60px; font-size: 18pt; font-weight: bold;">
-			Personal Items</p>
+			Personal Files and Folders</p>
 	</div>
 	<div style="text-align: center">
 		<form name="myForm" action="personalfiles" method="POST">
