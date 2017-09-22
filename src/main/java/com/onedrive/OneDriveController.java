@@ -3,6 +3,7 @@ package com.onedrive;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Enumeration;
 
 import javax.mail.MessagingException;
 import javax.servlet.ServletException;
@@ -58,6 +59,33 @@ public class OneDriveController {
 
 	}
 
+	/* method to test the form takes the page to complexform.jsp*/
+	@RequestMapping(value = "/complexform", method = RequestMethod.GET)
+	public ModelAndView formMethod() {
+
+		ModelAndView modelFormJsp = new ModelAndView();
+		modelFormJsp.setViewName("complexform");
+		
+		return modelFormJsp;
+	
+
+	}
+	
+	/* method to test the form takes the page to complexform.jsp*/
+	@RequestMapping(value = "/sendform", method = RequestMethod.POST)
+	public ModelAndView submitFormMethod(HttpServletRequest request) {
+		
+		
+	System.out.println(	"From the form testing  "+request.getParameter("maths"));
+		ModelAndView modelFormJsp = new ModelAndView();
+		modelFormJsp.setViewName("successfullfields");
+		
+		return modelFormJsp;
+	
+
+	}
+	
+	
 	
 	/* method to authorize the user and get token , response or token will be sent to redirect url*/
 	@RequestMapping(value = "/token", method = RequestMethod.GET)
